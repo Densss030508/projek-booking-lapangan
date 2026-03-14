@@ -30,10 +30,18 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
 
+    // ================= LAPANGAN =================
     Route::get('/admin/lapangan', [ProductController::class, 'index'])->name('lapangan.index');
     Route::get('/admin/lapangan/create', [ProductController::class, 'create'])->name('lapangan.create');
     Route::post('/admin/lapangan/store', [ProductController::class, 'store'])->name('lapangan.store');
+
+    // ================= PENGGUNA =================
+    Route::get('/admin/pengguna', function () {
+        return view('admin.pengguna.index');
+    })->name('pengguna.index');
+
+    // ================= LAPORAN =================
+    Route::get('/admin/laporan', function () {
+        return view('admin.laporan.index');
+    })->name('laporan.index');
 });
-Route::get('/admin/pengguna', function () {
-    return view('admin.pengguna.index');
-})->name('pengguna.index');

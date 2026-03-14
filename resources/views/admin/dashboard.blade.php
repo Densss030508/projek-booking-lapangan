@@ -205,11 +205,11 @@
 
             <div class="menu">
 
-                <a href="#" class="active">Dashboard</a>
+                <a href="{{ route('admin.dashboard') }}" class="active">Dashboard</a>
 
-                <a href="#">Kelola Lapangan</a>
+                <a href="{{ route('lapangan.index') }}">Kelola Lapangan</a>
 
-                <a href="#">Kelola Pengguna</a>
+                <a href="{{ route('pengguna.index') }}">Kelola Pengguna</a>
 
                 <a href="#">Laporan</a>
 

@@ -177,7 +177,6 @@
     </section>
 
 
-
     <!-- LOGIN MODAL -->
     <div class="modal" id="loginModal">
         <div class="modal-content">

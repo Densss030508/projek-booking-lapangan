@@ -4,10 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - KIXA Arena</title>
+    <title>Dashboard Admin</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
         * {
@@ -18,105 +17,107 @@
         }
 
         body {
-            background: #f4f6fb;
+            background: #dcdcdc;
+            display: flex;
         }
 
-        /* ================= SIDEBAR ================= */
+        /* SIDEBAR */
+
         .sidebar {
-            width: 260px;
+            width: 230px;
+            background: linear-gradient(180deg, #4f74c8, #3b63c5);
             height: 100vh;
-            background: linear-gradient(180deg, #1e3a8a, #2563eb);
+            padding: 20px;
             color: white;
-            padding: 25px 20px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            overflow-y: auto;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .logo {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 40px;
+            text-align: center;
+            margin-bottom: 20px;
         }
+
+        .logo img {
+            width: 120px;
+        }
+
+        /* MENU */
 
         .menu a {
             display: block;
-            padding: 12px;
-            margin-bottom: 12px;
-            text-decoration: none;
+            padding: 10px;
+            margin-bottom: 8px;
             color: white;
-            border-radius: 10px;
-            transition: .3s;
+            text-decoration: none;
+            border-radius: 5px;
         }
 
-        .menu a.active,
         .menu a:hover {
             background: rgba(255, 255, 255, 0.2);
         }
 
-        .menu form {
-            margin-top: 10px;
+        .menu a.active {
+            background: rgba(255, 255, 255, 0.3);
         }
 
-        .logout-btn {
-            background: none;
-            border: none;
-            color: white;
-            padding: 12px;
-            width: 100%;
-            text-align: left;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: .3s;
-        }
-
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        /* ================= MAIN ================= */
-        .main {
-            margin-left: 260px;
-            padding: 30px 40px;
-        }
-
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
+        /* PROFILE */
 
         .profile {
-            background: white;
-            padding: 8px 15px;
-            border-radius: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            padding-top: 15px;
+        }
+
+        .profile-box {
             display: flex;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 10px;
         }
 
-        .profile img {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
+        .profile-box img {
+            width: 40px;
         }
 
-        /* ================= STAT CARD ================= */
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 40px;
+        .logout-btn {
+            background: red;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* MAIN */
+
+        .main {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .title {
+            font-size: 22px;
+            margin-bottom: 25px;
+        }
+
+        /* STAT */
+
+        .stats {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 25px;
         }
 
         .stat-card {
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
+            flex: 1;
+            padding: 20px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 16px;
         }
 
         .stat-card h2 {
@@ -124,31 +125,31 @@
         }
 
         .blue {
-            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            background: #7da3d7;
         }
 
         .green {
-            background: linear-gradient(135deg, #22c55e, #15803d);
-        }
-
-        .orange {
-            background: linear-gradient(135deg, #fb923c, #ea580c);
+            background: #8be0a2;
         }
 
         .red {
-            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            background: #ef7777;
         }
 
-        /* ================= CARD ================= */
+        /* CARD */
+
         .card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            margin-bottom: 30px;
+            background: #efefef;
+            padding: 20px;
         }
 
-        /* ================= TABLE ================= */
+        .card h3 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        /* TABLE */
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -156,158 +157,176 @@
 
         th,
         td {
-            padding: 15px;
-            text-align: left;
+            border: 1px solid #999;
+            padding: 10px;
+            text-align: center;
         }
 
-        thead {
-            background: #f1f5f9;
+        th {
+            background: #ddd;
         }
 
-        tr {
-            border-bottom: 1px solid #e5e7eb;
+        /* STATUS */
+
+        .status-active {
+            background: #00ff00;
+            padding: 3px 10px;
         }
 
-        .badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
+        .status-non {
+            background: red;
             color: white;
+            padding: 3px 10px;
         }
 
-        .badge-success {
-            background: #22c55e;
-        }
-
-        .badge-danger {
-            background: #ef4444;
-        }
-
-        .btn {
-            padding: 6px 14px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-size: 13px;
-            color: white;
-        }
+        /* BUTTON */
 
         .btn-edit {
-            background: #22c55e;
-        }
-
-        .btn-delete {
-            background: #ef4444;
-        }
-
-        .btn-primary {
-            background: #2563eb;
-            padding: 8px 16px;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+            background: #8be0a2;
+            border: none;
+            padding: 5px 12px;
+            cursor: pointer;
         }
     </style>
+
 </head>
 
 <body>
 
     <!-- SIDEBAR -->
+
     <div class="sidebar">
-        <div class="logo">⚽ KIXA Arena</div>
 
-        <div class="menu">
-            <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                Dashboard
-            </a>
+        <div>
 
-            <a href="{{ route('lapangan.index') }}" class="{{ request()->routeIs('lapangan.*') ? 'active' : '' }}">
-                Kelola Lapangan
-            </a>
+            <div class="logo">
+                <img src="/images/kixa.png">
+            </div>
 
-            <a href="{{ route('pengguna.index') }}" class="{{ request()->routeIs('pengguna.*') ? 'active' : '' }}">
-                Kelola Pengguna
-            </a>
+            <div class="menu">
+
+                <a href="#" class="active">Dashboard</a>
+
+                <a href="#">Kelola Lapangan</a>
+
+                <a href="#">Kelola Pengguna</a>
+
+                <a href="#">Laporan</a>
+
+            </div>
+
+        </div>
+
+        <!-- PROFILE + LOGOUT -->
+
+        <div class="profile">
+
+            <div class="profile-box">
+
+                <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png">
+
+                <div>
+                    <div>Admin</div>
+                    <small>Dahlan</small>
+                </div>
+
+            </div>
 
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="logout-btn">Logout</button>
+                <button class="logout-btn">Log Out</button>
             </form>
+
         </div>
+
     </div>
 
     <!-- MAIN -->
+
     <div class="main">
 
-        <div class="topbar">
-            <h2>Dashboard Admin</h2>
-            <div class="profile">
-                <img src="https://i.pravatar.cc/40" alt="">
-                <span>Admin</span>
-            </div>
-        </div>
+        <div class="title">Dashboard Admin</div>
 
-        <div class="stat-grid">
+        <!-- STAT -->
+
+        <div class="stats">
+
             <div class="stat-card blue">
-                <h2>150</h2>
-                <p>Total User</p>
+                <h2>4</h2>
+                <div>Total User</div>
             </div>
 
             <div class="stat-card green">
-                <h2>6</h2>
-                <p>Total Lapangan</p>
-            </div>
-
-            <div class="stat-card orange">
-                <h2>8</h2>
-                <p>Sedang Booking</p>
+                <h2>3</h2>
+                <div>Total Lapangan</div>
             </div>
 
             <div class="stat-card red">
                 <h2>1</h2>
-                <p>Lapangan Nonaktif</p>
+                <div>Non Aktif Akun</div>
             </div>
+
         </div>
 
+        <!-- TABLE -->
+
         <div class="card">
-            <h3>Statistik Booking Mingguan</h3>
-            <canvas id="bookingChart" height="100"></canvas>
+
+            <h3>Kelola Pengguna</h3>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Email</th>
+                        <th>Peran</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Dahlan Kasir</td>
+                        <td>dashlan@gmail.com</td>
+                        <td>Kasir</td>
+                        <td><span class="status-active">Aktif</span></td>
+                        <td><button class="btn-edit">Edit</button></td>
+                    </tr>
+
+                    <tr>
+                        <td>Asep Admin</td>
+                        <td>asep@gmail.com</td>
+                        <td>Admin</td>
+                        <td><span class="status-active">Aktif</span></td>
+                        <td><button class="btn-edit">Edit</button></td>
+                    </tr>
+
+                    <tr>
+                        <td>Somat Owner</td>
+                        <td>somat@gmail.com</td>
+                        <td>Owner</td>
+                        <td><span class="status-active">Aktif</span></td>
+                        <td><button class="btn-edit">Edit</button></td>
+                    </tr>
+
+                    <tr>
+                        <td>Kasim Kasir</td>
+                        <td>kasim@gmail.com</td>
+                        <td>Kasir</td>
+                        <td><span class="status-non">Di NonAktifkan</span></td>
+                        <td><button class="btn-edit">Edit</button></td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
         </div>
 
     </div>
-
-    <script>
-        const ctx = document.getElementById('bookingChart');
-
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
-                datasets: [{
-                    data: [11, 13, 23, 19, 16, 10],
-                    backgroundColor: '#3b82f6',
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    </script>
 
 </body>
 

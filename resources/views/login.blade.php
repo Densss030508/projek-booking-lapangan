@@ -176,23 +176,7 @@
         </div>
     </section>
 
-    <!-- INFO -->
-    <section class="info-section">
-        <div class="card">
-            <h3>Lapangan Sintetis</h3>
-            <p>Rumput sintetis kualitas premium standar nasional dengan pencahayaan LED terang.</p>
-        </div>
 
-        <div class="card">
-            <h3>Ruang Ganti</h3>
-            <p>Ruang ganti bersih dan nyaman dengan fasilitas loker dan shower.</p>
-        </div>
-
-        <div class="card">
-            <h3>Parkir Luas</h3>
-            <p>Area parkir luas dan aman untuk motor maupun mobil.</p>
-        </div>
-    </section>
 
     <!-- LOGIN MODAL -->
     <div class="modal" id="loginModal">

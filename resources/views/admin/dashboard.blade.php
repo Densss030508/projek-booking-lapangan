@@ -211,7 +211,7 @@
 
                 <a href="{{ route('pengguna.index') }}">Kelola Pengguna</a>
 
-                <a href="#">Laporan</a>
+                <a href="{{ route('laporan.index') }}">Laporan</a>
 
             </div>
 

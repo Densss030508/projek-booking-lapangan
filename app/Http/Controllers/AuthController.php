@@ -20,17 +20,19 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        $credentials = [
-            'username' => $request->username,
-            'password' => $request->password,
-        ];
+        $login = $request->username;
+        $password = $request->password;
 
-        // Coba login
-        if (Auth::attempt($credentials)) {
+        // cek email atau username
+        $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        if (Auth::attempt([
+            $field => $login,
+            'password' => $password
+        ])) {
 
             $request->session()->regenerate();
 
-            // Redirect berdasarkan role
             if (Auth::user()->role == 'admin') {
                 return redirect()->route('admin.dashboard');
             }
@@ -39,7 +41,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'username' => 'Username atau password salah.',
+            'username' => 'Email / Username atau password salah.',
         ]);
     }
 

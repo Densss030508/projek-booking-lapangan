@@ -6,7 +6,7 @@
 
     <div class="header">
         <h2>Kelola Pengguna Admin</h2>
-        <button class="btn-tambah">+ Tambah Pengguna</button>
+        <a href="{{ route('pengguna.create') }}" class="btn-tambah">+ Tambah Pengguna</a>
     </div>
 
     <div class="card">
@@ -25,37 +25,26 @@
 
             <tbody>
 
-                <tr>
-                    <td>Dahlan Kasir</td>
-                    <td>dahlan@gmail.com</td>
-                    <td>Kasir</td>
-                    <td><span class="status-active">Aktif</span></td>
-                    <td><button class="btn-edit">Edit</button></td>
-                </tr>
+                {{-- DATA DARI DATABASE --}}
+                @foreach ($users as $user)
+                    <tr>
+                        <td>{{ $user->nama }}</td>
+                        <td>{{ $user->email }}</td>
+                        <td>{{ ucfirst($user->role) }}</td>
+                        <td>
+                            @if ($user->status == 'aktif')
+                                <span class="status-active">Aktif</span>
+                            @else
+                                <span class="status-non">Di NonAktifkan</span>
+                            @endif
+                        </td>
+                        <td>
+                            <a href="{{ route('pengguna.edit', $user->id) }}" class="btn-edit">Edit</a>
+                        </td>
+                    </tr>
+                @endforeach
 
-                <tr>
-                    <td>Asep Admin</td>
-                    <td>asep@gmail.com</td>
-                    <td>Admin</td>
-                    <td><span class="status-active">Aktif</span></td>
-                    <td><button class="btn-edit">Edit</button></td>
-                </tr>
-
-                <tr>
-                    <td>Somat Owner</td>
-                    <td>somat@gmail.com</td>
-                    <td>Owner</td>
-                    <td><span class="status-active">Aktif</span></td>
-                    <td><button class="btn-edit">Edit</button></td>
-                </tr>
-
-                <tr>
-                    <td>Kasim Kasir</td>
-                    <td>kasim@gmail.com</td>
-                    <td>Kasir</td>
-                    <td><span class="status-non">Di NonAktifkan</span></td>
-                    <td><button class="btn-edit">Edit</button></td>
-                </tr>
+                {{-- DATA DUMMY (TETAP ADA SESUAI PERMINTAANMU) --}}
 
             </tbody>
 

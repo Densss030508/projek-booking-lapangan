@@ -6,6 +6,9 @@
     <title>KIXA Arena</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- CSRF TOKEN (PENTING) -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <style>
         * {
             margin: 0;
@@ -70,38 +73,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .info-section {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            padding: 80px 8%;
-            flex-wrap: wrap;
-        }
-
-        .card {
-            background: #102a4d;
-            width: 280px;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0, 229, 255, 0.15);
-            transition: 0.3s;
-        }
-
-        .card:hover {
-            transform: translateY(-8px);
-        }
-
-        .card h3 {
-            margin-bottom: 10px;
-            color: #00e5ff;
-        }
-
-        .card p {
-            font-size: 14px;
-            color: #ccc;
-        }
-
         .modal {
             display: none;
             position: fixed;
@@ -155,6 +126,41 @@
             font-size: 20px;
             cursor: pointer;
         }
+
+        /* 🔥 ERROR BOX BARU */
+        .error-box {
+            background: rgba(255, 82, 82, 0.15);
+            color: #ff5252;
+            border: 1px solid #ff5252;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-3px);
+            }
+
+            50% {
+                transform: translateX(3px);
+            }
+
+            75% {
+                transform: translateX(-3px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 
@@ -176,8 +182,6 @@
         </div>
     </section>
 
-
-
     <!-- LOGIN MODAL -->
     <div class="modal" id="loginModal">
         <div class="modal-content">
@@ -185,15 +189,19 @@
 
             <form method="POST" action="{{ route('login') }}">
                 @csrf
+
+                <!-- BACKUP TOKEN -->
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+
                 <h2>Login KIXA</h2>
 
+                <!-- 🔥 ERROR TAMPILAN BARU -->
                 @if ($errors->any())
-                    <div style="color:#ff5252;text-align:center;">
-                        {{ $errors->first() }}
+                    <div class="error-box">
+                        ❌ {{ $errors->first() }}
                     </div>
                 @endif
 
-                <!-- SUDAH PAKAI USERNAME -->
                 <input type="text" name="username" placeholder="Username" value="{{ old('username') }}" required>
 
                 <input type="password" name="password" placeholder="Password" required>

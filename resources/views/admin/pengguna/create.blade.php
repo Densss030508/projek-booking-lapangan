@@ -41,7 +41,14 @@
             color: green;
             padding: 10px;
             border-radius: 6px;
-            display: inline-block;
+        }
+
+        .error-box {
+            margin-top: 10px;
+            background: #ffd2d2;
+            color: red;
+            padding: 10px;
+            border-radius: 6px;
         }
 
         .btn {
@@ -72,14 +79,21 @@
 
         <h3>Tambah Pengguna</h3>
 
-        <form action="#" method="POST">
+        <!-- 🔥 FIX PALING PENTING -->
+        <form action="/admin/pengguna/store" method="POST">
             @csrf
+
+            @if ($errors->any())
+                <div class="error-box">
+                    {{ $errors->first() }}
+                </div>
+            @endif
 
             <div class="form-grid">
 
                 <div class="form-group">
                     <label>Nama Pengguna</label>
-                    <input type="text" name="nama">
+                    <input type="text" name="nama" value="{{ old('nama') }}">
                 </div>
 
                 <div class="form-group">
@@ -93,7 +107,7 @@
 
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="email">
+                    <input type="email" name="email" value="{{ old('email') }}">
                 </div>
 
                 <div class="form-group">
@@ -116,9 +130,12 @@
 
             </div>
 
-            <div class="success-box">
-                ✔ Lapangan Telah Berhasil Di Tambah
-            </div>
+            <!-- ✅ NOTIF -->
+            @if (session('success'))
+                <div class="success-box">
+                    ✔ Pengguna Berhasil Ditambahkan
+                </div>
+            @endif
 
             <button type="submit" class="btn btn-save">+ Simpan Pengguna</button>
 

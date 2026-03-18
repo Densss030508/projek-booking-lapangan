@@ -22,14 +22,12 @@
         }
 
         /* SIDEBAR */
-
         .sidebar {
             width: 230px;
             background: linear-gradient(180deg, #4f74c8, #3b63c5);
             height: 100vh;
             padding: 20px;
             color: white;
-
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -45,7 +43,6 @@
         }
 
         /* MENU */
-
         .menu a {
             display: block;
             padding: 10px;
@@ -64,7 +61,6 @@
         }
 
         /* PROFILE */
-
         .profile {
             border-top: 1px solid rgba(255, 255, 255, 0.4);
             padding-top: 15px;
@@ -91,7 +87,6 @@
         }
 
         /* MAIN */
-
         .main {
             flex: 1;
             padding: 30px;
@@ -103,7 +98,6 @@
         }
 
         /* STAT */
-
         .stats {
             display: flex;
             gap: 25px;
@@ -137,7 +131,6 @@
         }
 
         /* CARD */
-
         .card {
             background: #efefef;
             padding: 20px;
@@ -149,7 +142,6 @@
         }
 
         /* TABLE */
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -167,7 +159,6 @@
         }
 
         /* STATUS */
-
         .status-active {
             background: #00ff00;
             padding: 3px 10px;
@@ -180,7 +171,6 @@
         }
 
         /* BUTTON */
-
         .btn-edit {
             background: #8be0a2;
             border: none;
@@ -188,94 +178,72 @@
             cursor: pointer;
         }
     </style>
-
 </head>
 
 <body>
 
     <!-- SIDEBAR -->
-
     <div class="sidebar">
 
         <div>
-
             <div class="logo">
                 <img src="/images/kixa.png">
             </div>
 
             <div class="menu">
-
                 <a href="{{ route('admin.dashboard') }}" class="active">Dashboard</a>
-
                 <a href="{{ route('lapangan.index') }}">Kelola Lapangan</a>
-
                 <a href="{{ route('pengguna.index') }}">Kelola Pengguna</a>
-
                 <a href="{{ route('laporan.index') }}">Laporan</a>
-
             </div>
-
         </div>
 
         <!-- PROFILE + LOGOUT -->
-
         <div class="profile">
-
             <div class="profile-box">
-
                 <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png">
-
                 <div>
                     <div>Admin</div>
                     <small>Dahlan</small>
                 </div>
-
             </div>
 
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button class="logout-btn">Log Out</button>
             </form>
-
         </div>
 
     </div>
 
     <!-- MAIN -->
-
     <div class="main">
 
         <div class="title">Dashboard Admin</div>
 
         <!-- STAT -->
-
         <div class="stats">
-
             <div class="stat-card blue">
-                <h2>4</h2>
+                <h2>{{ $totalUser }}</h2>
                 <div>Total User</div>
             </div>
 
             <div class="stat-card green">
-                <h2>3</h2>
+                <h2>{{ $totalLapangan }}</h2>
                 <div>Total Lapangan</div>
             </div>
 
             <div class="stat-card red">
-                <h2>1</h2>
+                <h2>{{ $nonAktif }}</h2>
                 <div>Non Aktif Akun</div>
             </div>
-
         </div>
 
         <!-- TABLE -->
-
         <div class="card">
-
             <h3>Kelola Pengguna</h3>
 
             <table>
-
                 <thead>
                     <tr>
                         <th>Nama</th>
@@ -287,43 +255,31 @@
                 </thead>
 
                 <tbody>
+                    @forelse ($users as $user)
+                        <tr>
+                            <td>{{ $user->nama }}</td>
+                            <td>{{ $user->email }}</td>
+                            <td>{{ $user->role }}</td>
 
-                    <tr>
-                        <td>Dahlan Kasir</td>
-                        <td>dashlan@gmail.com</td>
-                        <td>Kasir</td>
-                        <td><span class="status-active">Aktif</span></td>
-                        <td><button class="btn-edit">Edit</button></td>
-                    </tr>
+                            <td>
+                                @if ($user->status == 'aktif')
+                                    <span class="status-active">Aktif</span>
+                                @else
+                                    <span class="status-non">Di NonAktifkan</span>
+                                @endif
+                            </td>
 
-                    <tr>
-                        <td>Asep Admin</td>
-                        <td>asep@gmail.com</td>
-                        <td>Admin</td>
-                        <td><span class="status-active">Aktif</span></td>
-                        <td><button class="btn-edit">Edit</button></td>
-                    </tr>
-
-                    <tr>
-                        <td>Somat Owner</td>
-                        <td>somat@gmail.com</td>
-                        <td>Owner</td>
-                        <td><span class="status-active">Aktif</span></td>
-                        <td><button class="btn-edit">Edit</button></td>
-                    </tr>
-
-                    <tr>
-                        <td>Kasim Kasir</td>
-                        <td>kasim@gmail.com</td>
-                        <td>Kasir</td>
-                        <td><span class="status-non">Di NonAktifkan</span></td>
-                        <td><button class="btn-edit">Edit</button></td>
-                    </tr>
-
+                            <td>
+                                <a href="{{ route('pengguna.edit', $user->id) }}" class="btn-edit">Edit</a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5">Tidak ada data user</td>
+                        </tr>
+                    @endforelse
                 </tbody>
-
             </table>
-
         </div>
 
     </div>

@@ -33,6 +33,17 @@ class AuthController extends Controller
 
             $request->session()->regenerate();
 
+            // 🔥 TAMBAHAN: HANDLE AJAX
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'redirect' => Auth::user()->role == 'admin'
+                        ? route('admin.dashboard')
+                        : url('/')
+                ]);
+            }
+
+            // 🔥 DEFAULT (TIDAK DIHAPUS)
             if (Auth::user()->role == 'admin') {
                 return redirect()->route('admin.dashboard');
             }
@@ -40,6 +51,15 @@ class AuthController extends Controller
             return redirect('/');
         }
 
+        // 🔥 TAMBAHAN: ERROR AJAX
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email / Username atau password salah.'
+            ]);
+        }
+
+        // 🔥 DEFAULT (TIDAK DIHAPUS)
         return back()->withErrors([
             'username' => 'Email / Username atau password salah.',
         ]);

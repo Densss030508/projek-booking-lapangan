@@ -27,7 +27,8 @@
             font-weight: 500;
         }
 
-        .form-group input {
+        .form-group input,
+        .form-group select {
             padding: 10px;
             background: #ddd;
             border: none;
@@ -85,19 +86,17 @@
 
         <h3>Edit Pengguna</h3>
 
-        <form action="#" method="POST">
+        <form id="updateForm" action="{{ route('pengguna.update', $user->id) }}" method="POST">
             @csrf
             @method('PUT')
 
             <div class="form-grid">
 
-                <!-- Nama -->
                 <div class="form-group">
                     <label>Nama Pengguna</label>
                     <input type="text" name="nama" value="{{ $user->nama ?? '' }}">
                 </div>
 
-                <!-- Role (tidak bisa diubah) -->
                 <div class="form-group">
                     <label>Peran</label>
                     <div class="form-disabled">
@@ -105,25 +104,24 @@
                     </div>
                 </div>
 
-                <!-- Email -->
                 <div class="form-group">
                     <label>Email</label>
                     <input type="email" name="email" value="{{ $user->email ?? '' }}">
                 </div>
 
-                <!-- Status -->
                 <div class="form-group">
                     <label>Status</label>
-                    <input type="text" name="status" value="{{ $user->status ?? '' }}">
+                    <select name="status">
+                        <option value="aktif" {{ $user->status == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                        <option value="nonaktif" {{ $user->status == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                    </select>
                 </div>
 
-                <!-- Password -->
                 <div class="form-group">
                     <label>Password Baru</label>
                     <input type="password" name="password">
                 </div>
 
-                <!-- Konfirmasi -->
                 <div class="form-group">
                     <label>Konfirmasi Password Baru</label>
                     <input type="password" name="password_confirmation">
@@ -131,17 +129,60 @@
 
             </div>
 
-            <div class="success-box">
-                ✔ Lapangan Telah Berhasil Di Perbarui
-            </div>
+            @if (session('success'))
+                <div class="success-box">
+                    ✔ Lapangan Telah Berhasil Di Perbarui
+                </div>
+            @endif
 
             <div style="display: flex; justify-content: space-between;">
-                <button type="button" class="btn btn-delete">Hapus Pengguna</button>
-                <button type="submit" class="btn btn-save">+ Simpan Pengguna</button>
+                <button type="button" onclick="confirmDelete()" class="btn btn-delete">Hapus Pengguna</button>
+                <button type="button" onclick="confirmUpdate()" class="btn btn-save">+ Simpan Pengguna</button>
             </div>
 
         </form>
 
+        <!-- FORM DELETE (TAMBAHAN) -->
+        <form id="deleteForm" action="{{ route('pengguna.destroy', $user->id) }}" method="POST">
+            @csrf
+            @method('DELETE')
+        </form>
+
     </div>
+
+    <!-- SWEETALERT -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function confirmUpdate() {
+            Swal.fire({
+                title: 'Apakah Anda Yakin?',
+                text: "Perubahan data akan disimpan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Simpan!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('updateForm').submit();
+                }
+            })
+        }
+
+        function confirmDelete() {
+            Swal.fire({
+                title: 'Yakin hapus pengguna?',
+                text: "Data tidak bisa dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteForm').submit();
+                }
+            })
+        }
+    </script>
 
 @endsection

@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Product;
+use App\Models\Lapangan;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::all();
-        return view('admin.lapangan.index', compact('products'));
+        $lapangan = Lapangan::all();
+        return view('admin.lapangan.index', compact('lapangan'));
     }
 
     public function create()
@@ -21,14 +21,23 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_produk' => 'required',
-            'harga_produk' => 'required|numeric',
+            'nama' => 'required',
+            'harga' => 'required|numeric',
+            'jam_buka' => 'required',
+            'jam_tutup' => 'required',
+            'foto' => 'required|image'
         ]);
 
-        Product::create([
-            'nama_produk' => $request->nama_produk,
-            'harga_produk' => $request->harga_produk,
-            'status' => 'aktif'
+        // upload foto
+        $foto = $request->file('foto')->store('lapangan', 'public');
+
+        Lapangan::create([
+            'nama' => $request->nama,
+            'harga' => $request->harga,
+            'jam_buka' => $request->jam_buka,
+            'jam_tutup' => $request->jam_tutup,
+            'foto' => $foto,
+            'status' => 'tersedia'
         ]);
 
         return redirect()->route('lapangan.index')

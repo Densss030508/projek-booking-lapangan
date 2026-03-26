@@ -1,89 +1,120 @@
 @extends('layouts.admin')
 
-@section('title', 'Kelola Lapangan')
-
 @section('content')
+    <style>
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
 
+        .lapangan-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #f5f5f5;
+            border-radius: 12px;
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .card-body {
+            padding: 10px;
+        }
+
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .price {
+            font-weight: bold;
+        }
+
+        .btn-edit {
+            background: #2ecc71;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-tambah {
+            background: #5c6bc0;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .btn-tambah:hover {
+            background: #3f51b5;
+        }
+    </style>
+
+    <!-- HEADER -->
     <div class="header">
         <h2>Kelola Lapangan Admin</h2>
-        <button class="btn-tambah">+ Tambah Lapangan</button>
+
+        <a href="{{ route('lapangan.create') }}" class="btn-tambah">
+            + Tambah Lapangan
+        </a>
     </div>
 
+    <!-- GRID -->
     <div class="lapangan-grid">
+        @forelse ($lapangan as $item)
+            <div class="card">
+                <img src="{{ asset('storage/' . $item->foto) }}" alt="foto">
 
-        <!-- CARD 1 -->
-        <div class="card">
-            <img src="https://i.imgur.com/8zQZ7mC.jpg">
+                <div class="card-body">
+                    <h3>{{ $item->nama }}</h3>
+                    <p>Status: {{ $item->status }}</p>
+                    <p>Jam Operasi: {{ $item->jam_buka }} - {{ $item->jam_tutup }}</p>
 
-            <div class="card-title">Lapangan A</div>
+                    <div class="card-bottom">
+                        <span class="price">
+                            Rp {{ number_format($item->harga) }} / Jam
+                        </span>
 
-            <div class="card-info">
-                Status: Tersedia <br>
-                Jam Operasi : <br>
-                08.00 - 23.00
+                        <button class="btn-edit">
+                            Edit
+                        </button>
+                    </div>
+                </div>
             </div>
-
-            <div class="card-bottom">
-                <div class="price">RP. 120.000 / Jam</div>
-                <button class="btn-edit">Edit</button>
-            </div>
-        </div>
-
-        <!-- CARD 2 -->
-        <div class="card">
-            <img src="https://i.imgur.com/8zQZ7mC.jpg">
-
-            <div class="card-title">Lapangan B</div>
-
-            <div class="card-info">
-                Status: Tersedia <br>
-                Jam Operasi : <br>
-                08.00 - 23.00
-            </div>
-
-            <div class="card-bottom">
-                <div class="price">RP. 120.000 / Jam</div>
-                <button class="btn-edit">Edit</button>
-            </div>
-        </div>
-
-        <!-- CARD 3 -->
-        <div class="card">
-            <img src="https://i.imgur.com/8zQZ7mC.jpg">
-
-            <div class="card-title">Lapangan C</div>
-
-            <div class="card-info">
-                Status: Tersedia <br>
-                Jam Operasi : <br>
-                08.00 - 23.00
-            </div>
-
-            <div class="card-bottom">
-                <div class="price">RP. 120.000 / Jam</div>
-                <button class="btn-edit">Edit</button>
-            </div>
-        </div>
-
-        <!-- CARD 4 -->
-        <div class="card">
-            <img src="https://i.imgur.com/8zQZ7mC.jpg">
-
-            <div class="card-title">Lapangan D</div>
-
-            <div class="card-info">
-                Status: Tersedia <br>
-                Jam Operasi : <br>
-                08.00 - 23.00
-            </div>
-
-            <div class="card-bottom">
-                <div class="price">RP. 120.000 / Jam</div>
-                <button class="btn-edit">Edit</button>
-            </div>
-        </div>
-        ```
-
+        @empty
+            <p>Tidak ada data lapangan</p>
+        @endforelse
     </div>
 
+    <!-- SWEETALERT -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        </script>
+    @endif
 @endsection

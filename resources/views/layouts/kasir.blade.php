@@ -87,7 +87,10 @@
 
             <div class="logout">
                 <p>Kasir</p>
-                <button>Log Out</button>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button>Logout</button>
+                </form>
             </div>
         </div>
 

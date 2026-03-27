@@ -6,82 +6,60 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 
-/* ================= HOME ================= */
+/* HOME */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', fn() => view('welcome'));
 
-/* ================= LOGIN ================= */
+/* LOGIN */
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 
-/* ================= LOGOUT ================= */
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+/* LOGOUT (FIX POST) */
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-/* ================= ADMIN ================= */
-Route::middleware('auth')->group(function () {
 
-    // DASHBOARD
-    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])
-        ->name('admin.dashboard');
+/* ADMIN */
+Route::middleware('auth')->prefix('admin')->group(function () {
 
-    // LAPANGAN
-    Route::get('/admin/lapangan', [ProductController::class, 'index'])->name('lapangan.index');
-    Route::get('/admin/lapangan/create', [ProductController::class, 'create'])->name('lapangan.create');
-    Route::post('/admin/lapangan/store', [ProductController::class, 'store'])->name('lapangan.store');
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
-    // PENGGUNA
-    Route::get('/admin/pengguna', [UserController::class, 'index'])->name('pengguna.index');
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/lapangan', [ProductController::class, 'index'])->name('lapangan.index');
+    Route::get('/lapangan/create', [ProductController::class, 'create'])->name('lapangan.create');
+    Route::post('/lapangan/store', [ProductController::class, 'store'])->name('lapangan.store');
 
-    Route::get('/admin/pengguna/create', function () {
-        return view('admin.pengguna.create');
-    })->name('pengguna.create');
+    Route::get('/pengguna', [UserController::class, 'index'])->name('pengguna.index');
 
-    Route::get('/admin/pengguna/{id}/edit', function ($id) {
+    Route::get('/pengguna/create', fn() => view('admin.pengguna.create'))->name('pengguna.create');
+
+    Route::get('/pengguna/{id}/edit', function ($id) {
         $user = \App\Models\User::find($id);
         return view('admin.pengguna.edit', compact('user'));
     })->name('pengguna.edit');
 
-    // 🔥 TAMBAHAN FIX (PENTING BANGET, TIDAK MENGHAPUS)
-    Route::post('/admin/pengguna/create', function () {
-        return redirect('/admin/pengguna/create');
-    });
+    Route::post('/pengguna/store', [UserController::class, 'store'])->name('pengguna.store');
+    Route::put('/pengguna/{id}', [UserController::class, 'update'])->name('pengguna.update');
+    Route::delete('/pengguna/{id}', [UserController::class, 'destroy'])->name('pengguna.destroy');
 
-    // 🔥 INI SUDAH BENAR (JANGAN DIUBAH LAGI)
-    Route::post('/admin/pengguna/store', [UserController::class, 'store'])->name('pengguna.store');
-
-    Route::put('/admin/pengguna/{id}', [UserController::class, 'update'])->name('pengguna.update');
-
-    // 🔥 DELETE
-    Route::delete('/admin/pengguna/{id}', [UserController::class, 'destroy'])->name('pengguna.destroy');
-
-    // LAPORAN
-    Route::get('/admin/laporan', function () {
-        return view('admin.laporan.index');
-    })->name('laporan.index');
+    Route::get('/laporan', fn() => view('admin.laporan.index'))->name('laporan.index');
 });
 
 
-/* ================= KASIR ================= */
+/* KASIR */
+Route::middleware('auth')->prefix('kasir')->group(function () {
 
-// DASHBOARD KASIR
-Route::get('/kasir/dashboard', function () {
-    return view('kasir.dashboard');
-})->name('kasir.dashboard');
+    Route::get('/dashboard', fn() => view('kasir.dashboard'))->name('kasir.dashboard');
+    Route::get('/jadwal', fn() => view('kasir.jadwal'))->name('kasir.jadwal');
+    Route::get('/transaksi', fn() => view('kasir.transaksi'))->name('kasir.transaksi');
+    Route::get('/booking', fn() => view('kasir.booking'))->name('kasir.booking');
+});
 
-// JADWAL
-Route::get('/kasir/jadwal', function () {
-    return view('kasir.jadwal');
-})->name('kasir.jadwal');
 
-// TRANSAKSI
-Route::get('/kasir/transaksi', function () {
-    return view('kasir.transaksi');
-})->name('kasir.transaksi');
+/* OWNER */
+Route::middleware('auth')->prefix('owner')->group(function () {
 
-// BOOKING
-Route::get('/kasir/booking', function () {
-    return view('kasir.booking');
-})->name('kasir.booking');
+    Route::get('/dashboard', fn() => view('owner.dashboard'))->name('owner.dashboard');
+    Route::get('/produk', fn() => view('owner.produk'))->name('owner.produk');
+    Route::get('/detail', fn() => view('owner.detail'))->name('owner.detail');
+    Route::get('/laporan', fn() => view('owner.laporan'))->name('owner.laporan');
+    Route::get('/aktivitas', fn() => view('owner.aktivitas'))->name('owner.aktivitas');
+});

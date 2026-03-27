@@ -17,7 +17,7 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 
 /* ================= LOGOUT ================= */
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 /* ================= ADMIN ================= */
 Route::middleware('auth')->group(function () {
@@ -62,3 +62,26 @@ Route::middleware('auth')->group(function () {
         return view('admin.laporan.index');
     })->name('laporan.index');
 });
+
+
+/* ================= KASIR ================= */
+
+// DASHBOARD KASIR
+Route::get('/kasir/dashboard', function () {
+    return view('kasir.dashboard');
+})->name('kasir.dashboard');
+
+// JADWAL
+Route::get('/kasir/jadwal', function () {
+    return view('kasir.jadwal');
+})->name('kasir.jadwal');
+
+// TRANSAKSI
+Route::get('/kasir/transaksi', function () {
+    return view('kasir.transaksi');
+})->name('kasir.transaksi');
+
+// BOOKING
+Route::get('/kasir/booking', function () {
+    return view('kasir.booking');
+})->name('kasir.booking');

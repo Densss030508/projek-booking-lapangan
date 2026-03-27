@@ -52,11 +52,16 @@ class AuthController extends Controller
         // regenerate session
         $request->session()->regenerate();
 
-        // redirect admin
+        // 🔥 TAMBAHAN ROLE (TIDAK MENGHAPUS YANG LAMA)
         if ($user->role == 'admin') {
             return redirect()->route('admin.dashboard');
+        } elseif ($user->role == 'kasir') {
+            return redirect()->route('kasir.dashboard');
+        } elseif ($user->role == 'owner') {
+            return redirect('/owner/dashboard'); // bisa dibuat nanti
         }
 
+        // default
         return redirect('/');
     }
 
@@ -64,8 +69,12 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
+
+        // 🔥 hapus semua session
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/login');
+
+        // 🔥 redirect ke welcome
+        return redirect('/');
     }
 }

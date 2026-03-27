@@ -283,11 +283,7 @@
 
             </div>
 
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button class="logout-btn">Log Out</button>
-            </form>
-
+            <a href="{{ route('logout') }}" class="logout-btn">Log Out</a>
         </div>
 
     </div>

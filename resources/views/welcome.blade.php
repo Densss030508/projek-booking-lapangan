@@ -70,38 +70,12 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .info-section {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            padding: 80px 8%;
-            flex-wrap: wrap;
-        }
-
-        .card {
-            background: #102a4d;
-            width: 280px;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0, 229, 255, 0.15);
-            transition: 0.3s;
-        }
-
-        .card:hover {
-            transform: translateY(-8px);
-        }
-
-        .card h3 {
-            margin-bottom: 10px;
-            color: #00e5ff;
-        }
-
-        .card p {
-            font-size: 14px;
+        .hero p {
+            margin-top: 10px;
             color: #ccc;
         }
 
+        /* MODAL */
         .modal {
             display: none;
             position: fixed;
@@ -148,6 +122,14 @@
             cursor: pointer;
         }
 
+        .error-box {
+            background: #ff5252;
+            padding: 10px;
+            margin-bottom: 10px;
+            text-align: center;
+            border-radius: 6px;
+        }
+
         .close {
             position: absolute;
             top: 10px;
@@ -176,23 +158,22 @@
         </div>
     </section>
 
-
     <!-- LOGIN MODAL -->
-    <div class="modal" id="loginModal">
+    <div class="modal" id="loginModal" style="display: {{ $errors->any() ? 'flex' : 'none' }};">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
 
             <form method="POST" action="{{ route('login') }}">
                 @csrf
+
                 <h2>Login KIXA</h2>
 
                 @if ($errors->any())
-                    <div style="color:#ff5252;text-align:center;">
+                    <div class="error-box">
                         {{ $errors->first() }}
                     </div>
                 @endif
 
-                <!-- SUDAH PAKAI USERNAME -->
                 <input type="text" name="username" placeholder="Username" value="{{ old('username') }}" required>
 
                 <input type="password" name="password" placeholder="Password" required>

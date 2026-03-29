@@ -89,12 +89,12 @@
 
                     <div class="card-bottom">
                         <span class="price">
-                            Rp {{ number_format($item->harga) }} / Jam
+                            Rp {{ number_format($item->harga, 0, ',', '.') }} / Jam
                         </span>
 
-                        <button class="btn-edit">
+                        <a href="{{ route('lapangan.edit', $item->id) }}" class="btn-edit">
                             Edit
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

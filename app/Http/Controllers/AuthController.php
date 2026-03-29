@@ -46,35 +46,39 @@ class AuthController extends Controller
             return back()->withErrors(['username' => 'Password salah']);
         }
 
-        // 🔥 FIX LOGIN (PENTING BANGET)
+        // login
         Auth::loginUsingId($user->id);
 
         // regenerate session
         $request->session()->regenerate();
 
-        // 🔥 TAMBAHAN ROLE (TIDAK MENGHAPUS YANG LAMA)
+        // redirect sesuai role
         if ($user->role == 'admin') {
             return redirect()->route('admin.dashboard');
         } elseif ($user->role == 'kasir') {
             return redirect()->route('kasir.dashboard');
         } elseif ($user->role == 'owner') {
-            return redirect('/owner/dashboard'); // bisa dibuat nanti
+            return redirect()->route('owner.dashboard');
         }
 
-        // default
         return redirect('/');
     }
 
-    // 🔹 logout
+    // 🔹 LOGOUT (🔥 FIX UTAMA)
     public function logout(Request $request)
     {
         Auth::logout();
 
-        // 🔥 hapus semua session
+        // hapus session
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // 🔥 redirect ke welcome
-        return redirect('/');
+        // 🔥 FIX: arahkan ke welcome (SAMA SEMUA ROLE)
+        return redirect('/')
+            ->withHeaders([
+                'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => 'Sat, 01 Jan 1990 00:00:00 GMT',
+            ]);
     }
 }

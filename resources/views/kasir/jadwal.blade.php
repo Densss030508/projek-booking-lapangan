@@ -4,89 +4,98 @@
 
 @section('content')
 
-    <div class="title">Jadwal Lapangan</div>
-
-    <div class="jadwal-container">
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Jam</th>
-                    <th>Lapangan A</th>
-                    <th>Lapangan B</th>
-                    <th>Lapangan C</th>
-                    <th>Lapangan D</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                @for ($i = 8; $i <= 12; $i++)
-                    <tr>
-                        <td>{{ $i }}.00</td>
-
-                        <td><span class="status kosong">Kosong</span></td>
-                        <td><span class="status kosong">Kosong</span></td>
-                        <td><span class="status kosong">Kosong</span></td>
-                        <td>
-                            @if ($i == 10)
-                                <span class="status booking">Booking</span>
-                            @else
-                                <span class="status kosong">Kosong</span>
-                            @endif
-                        </td>
-                    </tr>
-                @endfor
-            </tbody>
-        </table>
-
-    </div>
-
     <style>
         .title {
-            font-size: 22px;
-            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: gray;
             margin-bottom: 20px;
         }
 
-        .jadwal-container {
-            background: #eee;
+        .table-box {
+            background: #ddd;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 8px;
         }
 
-        /* TABLE */
         table {
             width: 100%;
             border-collapse: collapse;
-            background: #ddd;
+            background: #ccc;
         }
 
         th,
         td {
-            border: 1px solid #999;
+            border: 1px solid #888;
             padding: 10px;
             text-align: center;
         }
 
         th {
-            background: #bbb;
-        }
-
-        /* STATUS */
-        .status {
-            padding: 5px 10px;
-            border-radius: 6px;
-            color: white;
-            font-size: 12px;
+            background: #bfbfbf;
         }
 
         .kosong {
-            background: #4cd964;
+            background: #63e26c;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
         }
 
         .booking {
-            background: #ff3b30;
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
         }
     </style>
+
+    <div class="title">Jadwal Lapangan Hari Ini</div>
+    <div class="subtitle">Tampilan Detail Lapangan Yang Tersedia</div>
+
+    <div class="table-box">
+
+        <table>
+            <tr>
+                <th>Jam</th>
+                <th>Lapangan A</th>
+                <th>Lapangan B</th>
+                <th>Lapangan C</th>
+                <th>Lapangan D</th>
+            </tr>
+
+            @for ($i = 0; $i < 15; $i++)
+                <tr>
+                    <td>{{ 8 + $i }}.00</td>
+
+                    <td><span class="kosong">Kosong</span></td>
+
+                    <td>
+                        @if ($i % 3 == 0)
+                            <span class="booking">Booking</span>
+                        @else
+                            <span class="kosong">Kosong</span>
+                        @endif
+                    </td>
+
+                    <td><span class="kosong">Kosong</span></td>
+
+                    <td>
+                        @if ($i % 4 == 0)
+                            <span class="booking">Booking</span>
+                        @else
+                            <span class="kosong">Kosong</span>
+                        @endif
+                    </td>
+                </tr>
+            @endfor
+
+        </table>
+
+    </div>
 
 @endsection

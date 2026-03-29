@@ -4,11 +4,91 @@
 
 @section('content')
 
-    <div class="dashboard-title">Dashboard Kasir</div>
+    <style>
+        .title {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
 
-    <!-- CARD -->
-    <div class="card-wrapper">
+        /* CARD */
+        .cards {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
 
+        .card {
+            flex: 1;
+            padding: 20px;
+            border-radius: 8px;
+            color: black;
+            text-align: center;
+        }
+
+        .blue {
+            background: #7ea6d8;
+        }
+
+        .green {
+            background: #8be0a4;
+        }
+
+        .orange {
+            background: #e6a97c;
+        }
+
+        .card h2 {
+            font-size: 28px;
+        }
+
+        /* TABLE */
+        .table-box {
+            background: #eee;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ccc;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #888;
+            text-align: center;
+        }
+
+        .kosong {
+            background: #63e26c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .booking {
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .btn-lihat {
+            float: right;
+            background: #7ea6d8;
+            padding: 8px 12px;
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+
+    <div class="title">Dashboard Kasir</div>
+
+    <!-- CARDS -->
+    <div class="cards">
         <div class="card blue">
             <h2>8</h2>
             <p>Booking Hari Ini</p>
@@ -23,161 +103,36 @@
             <h2>4</h2>
             <p>Lapangan Tersedia</p>
         </div>
-
     </div>
 
-    <!-- JADWAL -->
-    <div class="jadwal-container">
+    <!-- TABLE -->
+    <div class="table-box">
 
-        <div class="jadwal-header">
-            <h3>Jadwal Lapangan Hari Ini</h3>
-            <a href="#" class="btn-jadwal">Lihat Jadwal Lengkap</a>
-        </div>
+        <h3>Jadwal Lapangan Hari Ini</h3>
+        <a href="{{ route('kasir.jadwal') }}" class="btn-lihat">Lihat Jadwal Lengkap</a>
+
+        <br><br>
 
         <table>
-            <thead>
-                <tr>
-                    <th>Jam</th>
-                    <th>Lapangan A</th>
-                    <th>Lapangan B</th>
-                    <th>Lapangan C</th>
-                    <th>Lapangan D</th>
-                </tr>
-            </thead>
+            <tr>
+                <th>Jam</th>
+                <th>Lapangan A</th>
+                <th>Lapangan B</th>
+                <th>Lapangan C</th>
+                <th>Lapangan D</th>
+            </tr>
 
-            <tbody>
+            @for ($i = 0; $i < 4; $i++)
                 <tr>
                     <td>08.00</td>
-                    <td><span class="status kosong">Kosong</span></td>
-                    <td><span class="status booking">Booking</span></td>
-                    <td><span class="status kosong">Kosong</span></td>
-                    <td><span class="status kosong">Kosong</span></td>
+                    <td><span class="kosong">Kosong</span></td>
+                    <td><span class="booking">Booking</span></td>
+                    <td><span class="kosong">Kosong</span></td>
+                    <td><span class="kosong">Kosong</span></td>
                 </tr>
-
-                <tr>
-                    <td>09.00</td>
-                    <td><span class="status booking">Booking</span></td>
-                    <td><span class="status kosong">Kosong</span></td>
-                    <td><span class="status kosong">Kosong</span></td>
-                    <td><span class="status kosong">Kosong</span></td>
-                </tr>
-
-                <tr>
-                    <td>10.00</td>
-                    <td><span class="status kosong">Kosong</span></td>
-                    <td><span class="status kosong">Kosong</span></td>
-                    <td><span class="status booking">Booking</span></td>
-                    <td><span class="status kosong">Kosong</span></td>
-                </tr>
-
-                <tr>
-                    <td>11.00</td>
-                    <td><span class="status kosong">Kosong</span></td>
-                    <td><span class="status kosong">Kosong</span></td>
-                    <td><span class="status kosong">Kosong</span></td>
-                    <td><span class="status booking">Booking</span></td>
-                </tr>
-            </tbody>
+            @endfor
         </table>
 
     </div>
-
-    <!-- STYLE -->
-    <style>
-        .dashboard-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-
-        /* CARD */
-        .card-wrapper {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .card {
-            flex: 1;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            font-weight: bold;
-            color: #000;
-        }
-
-        .card h2 {
-            margin: 0;
-            font-size: 28px;
-        }
-
-        .blue {
-            background: #7da2d6;
-        }
-
-        .green {
-            background: #7ee2a8;
-        }
-
-        .orange {
-            background: #e6a87c;
-        }
-
-        /* JADWAL */
-        .jadwal-container {
-            background: #f1f1f1;
-            padding: 15px;
-            border-radius: 10px;
-        }
-
-        .jadwal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .btn-jadwal {
-            background: #4f73c3;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            text-decoration: none;
-        }
-
-        /* TABLE */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #ddd;
-        }
-
-        th,
-        td {
-            border: 1px solid #999;
-            padding: 10px;
-            text-align: center;
-        }
-
-        th {
-            background: #bbb;
-        }
-
-        /* STATUS */
-        .status {
-            padding: 5px 10px;
-            border-radius: 6px;
-            color: white;
-            font-size: 12px;
-        }
-
-        .kosong {
-            background: #4cd964;
-        }
-
-        .booking {
-            background: #ff3b30;
-        }
-    </style>
 
 @endsection

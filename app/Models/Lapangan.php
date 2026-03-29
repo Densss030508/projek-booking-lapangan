@@ -17,5 +17,5 @@ class Lapangan extends Model
         'jam_tutup'
     ];
 
-    public $timestamps = true; // ubah ke false kalau tidak ada kolom timestamp
+    public $timestamps = true;
 }

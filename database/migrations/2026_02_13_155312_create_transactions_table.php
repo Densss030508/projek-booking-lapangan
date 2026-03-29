@@ -10,13 +10,15 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_produk')
-                ->constrained('products')
-                ->onDelete('cascade');
-            $table->string('nama_pelanggan', 45);
-            $table->string('nomor_unik', 10);
-            $table->integer('uang_bayar');
-            $table->integer('uang_kembali');
+            $table->string('nama');
+            $table->string('no_hp');
+            $table->string('lapangan');
+            $table->string('jam');
+            $table->integer('durasi');
+            $table->integer('harga');
+            $table->integer('total');
+            $table->integer('bayar');
+            $table->integer('kembalian');
             $table->timestamps();
         });
     }

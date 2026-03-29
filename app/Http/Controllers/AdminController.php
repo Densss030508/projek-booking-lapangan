@@ -10,12 +10,11 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-
         $totalUser = User::count();
         $totalLapangan = Lapangan::count();
         $nonAktif = User::where('status', 'nonaktif')->count();
 
-        $users = User::all();
+        $users = User::latest()->get();
 
         return view('admin.dashboard', compact(
             'totalUser',

@@ -11,33 +11,32 @@ class LapanganController extends Controller
     // 🔹 Tampilkan semua lapangan
     public function index()
     {
-        $lapangan = Lapangan::all();
+        $lapangan = Lapangan::latest()->get(); // biar urut terbaru
         return view('admin.lapangan.index', compact('lapangan'));
-    }
-
-    // 🔹 Form tambah (optional kalau pakai modal bisa tidak dipakai)
-    public function create()
-    {
-        return view('admin.lapangan.create');
     }
 
     // 🔹 Simpan data baru
     public function store(Request $request)
     {
         $request->validate([
-            'nama' => 'required',
-            'status' => 'required',
+            'nama' => 'required|string|max:255',
+            'status' => 'required|string',
             'harga' => 'required|numeric',
-            'foto' => 'required|image'
+            'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
-        $foto = $request->file('foto')->store('lapangan', 'public');
+        // 🔥 SIMPAN FOTO (AMAN)
+        $fotoPath = null;
+        if ($request->hasFile('foto')) {
+            $fotoPath = $request->file('foto')->store('lapangan', 'public');
+        }
 
+        // 🔥 SIMPAN KE DATABASE
         Lapangan::create([
             'nama' => $request->nama,
             'status' => $request->status,
             'harga' => $request->harga,
-            'foto' => $foto,
+            'foto' => $fotoPath,
             'jam_buka' => '08:00',
             'jam_tutup' => '23:00'
         ]);
@@ -45,38 +44,37 @@ class LapanganController extends Controller
         return redirect()->back()->with('success', 'Lapangan berhasil ditambahkan!');
     }
 
-    // 🔹 Form edit (kalau pakai modal, ini optional)
+    // 🔹 Edit
     public function edit($id)
     {
         $lapangan = Lapangan::findOrFail($id);
         return view('admin.lapangan.edit', compact('lapangan'));
     }
 
-    // 🔹 Update data
+    // 🔹 Update
     public function update(Request $request, $id)
     {
         $lapangan = Lapangan::findOrFail($id);
 
         $request->validate([
-            'nama' => 'required',
-            'status' => 'required',
+            'nama' => 'required|string|max:255',
+            'status' => 'required|string',
             'harga' => 'required|numeric',
         ]);
 
-        // Jika upload foto baru
+        // 🔥 CEK FOTO BARU
         if ($request->hasFile('foto')) {
 
-            // Hapus foto lama
+            // hapus lama
             if ($lapangan->foto && Storage::exists('public/' . $lapangan->foto)) {
                 Storage::delete('public/' . $lapangan->foto);
             }
 
-            // Simpan foto baru
-            $foto = $request->file('foto')->store('lapangan', 'public');
-            $lapangan->foto = $foto;
+            // simpan baru
+            $lapangan->foto = $request->file('foto')->store('lapangan', 'public');
         }
 
-        // Update data
+        // 🔥 UPDATE DATA
         $lapangan->update([
             'nama' => $request->nama,
             'status' => $request->status,
@@ -86,12 +84,12 @@ class LapanganController extends Controller
         return redirect()->back()->with('success', 'Lapangan berhasil diperbarui!');
     }
 
-    // 🔹 Hapus data
+    // 🔹 Hapus
     public function destroy($id)
     {
         $lapangan = Lapangan::findOrFail($id);
 
-        // Hapus foto
+        // hapus foto
         if ($lapangan->foto && Storage::exists('public/' . $lapangan->foto)) {
             Storage::delete('public/' . $lapangan->foto);
         }

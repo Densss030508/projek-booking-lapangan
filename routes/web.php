@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\KasirController;
 
 /* HOME */
 
@@ -26,6 +27,14 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/lapangan', [ProductController::class, 'index'])->name('lapangan.index');
     Route::get('/lapangan/create', [ProductController::class, 'create'])->name('lapangan.create');
     Route::post('/lapangan/store', [ProductController::class, 'store'])->name('lapangan.store');
+
+    // 🔥 TAMBAHAN EDIT (INI YANG KURANG)
+    Route::get('/lapangan/{id}/edit', [ProductController::class, 'edit'])->name('lapangan.edit');
+
+    Route::put('/lapangan/{id}', [ProductController::class, 'update'])->name('lapangan.update');
+
+    // 🔥 BONUS HAPUS (BIAR LENGKAP)
+    Route::delete('/lapangan/{id}', [ProductController::class, 'destroy'])->name('lapangan.destroy');
 
     Route::get('/pengguna', [UserController::class, 'index'])->name('pengguna.index');
 
@@ -50,7 +59,15 @@ Route::middleware('auth')->prefix('kasir')->group(function () {
     Route::get('/dashboard', fn() => view('kasir.dashboard'))->name('kasir.dashboard');
     Route::get('/jadwal', fn() => view('kasir.jadwal'))->name('kasir.jadwal');
     Route::get('/transaksi', fn() => view('kasir.transaksi'))->name('kasir.transaksi');
-    Route::get('/booking', fn() => view('kasir.booking'))->name('kasir.booking');
+
+    // 🔥 FIX booking pakai controller
+    Route::get('/booking', [KasirController::class, 'booking'])->name('kasir.booking');
+
+    // 🔥 SIMPAN TRANSAKSI
+    Route::post('/transaksi', [KasirController::class, 'store'])->name('kasir.store');
+
+    // 🔥 STRUK
+    Route::get('/struk/{id}', [KasirController::class, 'struk'])->name('kasir.struk');
 });
 
 

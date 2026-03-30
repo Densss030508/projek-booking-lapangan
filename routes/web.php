@@ -58,15 +58,14 @@ Route::middleware('auth')->prefix('kasir')->group(function () {
 
     Route::get('/dashboard', fn() => view('kasir.dashboard'))->name('kasir.dashboard');
     Route::get('/jadwal', fn() => view('kasir.jadwal'))->name('kasir.jadwal');
-    Route::get('/transaksi', fn() => view('kasir.transaksi'))->name('kasir.transaksi');
 
-    // 🔥 FIX booking pakai controller
+    // transaksi dinamis dari database
+    Route::get('/transaksi', [KasirController::class, 'transaksi'])->name('kasir.transaksi');
+
     Route::get('/booking', [KasirController::class, 'booking'])->name('kasir.booking');
 
-    // 🔥 SIMPAN TRANSAKSI
     Route::post('/transaksi', [KasirController::class, 'store'])->name('kasir.store');
 
-    // 🔥 STRUK
     Route::get('/struk/{id}', [KasirController::class, 'struk'])->name('kasir.struk');
 });
 

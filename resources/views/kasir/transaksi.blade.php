@@ -18,7 +18,6 @@
             background: #4aa3b5;
         }
 
-        /* SIDEBAR */
         .sidebar {
             width: 230px;
             height: 100vh;
@@ -67,7 +66,6 @@
             cursor: pointer;
         }
 
-        /* CONTENT */
         .content {
             flex: 1;
             padding: 20px;
@@ -85,7 +83,6 @@
             margin-bottom: 15px;
         }
 
-        /* FILTER */
         .filter {
             display: flex;
             justify-content: space-between;
@@ -120,7 +117,6 @@
             outline: none;
         }
 
-        /* TABLE */
         .table-box {
             background: white;
             border-radius: 8px;
@@ -165,7 +161,6 @@
 
 <body>
 
-    <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="top">
             <div class="logo">
@@ -182,9 +177,8 @@
 
         <div class="bottom">
             <p>Kasir</p>
-            <small>Dahlan</small>
+            <small>{{ auth()->user()->nama ?? 'Dahlan' }}</small>
 
-            <!-- FIX 419 -->
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
                 <button class="logout-btn">Log Out</button>
@@ -192,13 +186,19 @@
         </div>
     </div>
 
-    <!-- CONTENT -->
     <div class="content">
+
+        {{-- ✅ NOTIF --}}
+        @if (session('success'))
+            <div
+                style="background:#4CAF50;color:white;padding:12px;margin-bottom:15px;border-radius:6px;text-align:center;">
+                {{ session('success') }}
+            </div>
+        @endif
 
         <div class="title">Riwayat Transaksi</div>
         <div class="subtitle">Daftar Transaksi Yang Telah Dilakukan</div>
 
-        <!-- FILTER -->
         <div class="filter">
             <div class="filter-left">
                 <input type="date">
@@ -214,7 +214,6 @@
             </div>
         </div>
 
-        <!-- TABLE -->
         <div class="table-box">
             <table>
                 <tr>
@@ -231,21 +230,29 @@
                     <th>Aksi</th>
                 </tr>
 
-                @for ($i = 1; $i <= 7; $i++)
+                @forelse ($transaksi as $item)
                     <tr>
-                        <td>{{ $i }}</td>
-                        <td>24 Mei 2026</td>
-                        <td>Lapangan Futsal A</td>
-                        <td>19.00-20.00</td>
-                        <td>1 Jam</td>
-                        <td>Denis Irwansyah</td>
-                        <td>Rp. 70.000</td>
-                        <td>081234123</td>
-                        <td>TRX-20260312-00{{ $i }}</td>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $item->created_at->format('d M Y') }}</td>
+                        <td>{{ $item->lapangan }}</td>
+                        <td>{{ $item->jam }}</td>
+                        <td>{{ $item->durasi }} Jam</td>
+                        <td>{{ $item->nama }}</td>
+                        <td>Rp. {{ number_format($item->total, 0, ',', '.') }}</td>
+                        <td>{{ $item->no_hp }}</td>
+                        <td>{{ $item->kode_transaksi }}</td>
                         <td><span class="status">Berhasil</span></td>
-                        <td class="aksi">🖨️</td>
+                        <td class="aksi">
+                            <a href="{{ route('kasir.struk', $item->id) }}" target="_blank">
+                                🖨️
+                            </a>
+                        </td>
                     </tr>
-                @endfor
+                @empty
+                    <tr>
+                        <td colspan="11">Belum ada transaksi</td>
+                    </tr>
+                @endforelse
 
             </table>
         </div>

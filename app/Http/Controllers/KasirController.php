@@ -3,20 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Lapangan;
 use App\Models\Transaksi;
+use App\Models\Lapangan;
 
 class KasirController extends Controller
 {
-    public function booking(Request $request)
+    public function booking()
     {
         $lapangans = Lapangan::all();
+        $transaksi = Transaksi::all();
 
-        $tanggal = $request->tanggal ?? date('Y-m-d');
+        return view('kasir.booking', compact('lapangans', 'transaksi'));
+    }
 
-        $booking = Transaksi::whereDate('created_at', $tanggal)->get();
-
-        return view('kasir.booking', compact('lapangans', 'booking', 'tanggal'));
+    public function transaksi()
+    {
+        $transaksi = Transaksi::latest()->get();
+        return view('kasir.transaksi', compact('transaksi'));
     }
 
     public function store(Request $request)
@@ -28,24 +31,39 @@ class KasirController extends Controller
             'jam' => 'required',
             'durasi' => 'required',
             'harga' => 'required',
-            'total' => 'required',
             'bayar' => 'required',
-            'kembalian' => 'required',
+            'tanggal' => 'required',
         ]);
 
-        $trx = Transaksi::create([
+        $harga = (int) str_replace('.', '', $request->harga);
+        $bayar = (int) str_replace('.', '', $request->bayar);
+        $durasi = (int) $request->durasi;
+
+        $total = $harga * $durasi;
+        $kembalian = $bayar - $total;
+
+        // pastikan format jam tetap string range
+        $jam = $request->jam;
+
+        $kode = 'TRX-' . now()->format('Ymd') . '-' . rand(100, 999);
+
+        $transaksi = Transaksi::create([
+            'kode_transaksi' => $kode,
+            'tanggal' => $request->tanggal,
             'nama' => $request->nama,
             'no_hp' => $request->no_hp,
             'lapangan' => $request->lapangan,
-            'jam' => $request->jam,
-            'durasi' => $request->durasi,
-            'harga' => $request->harga,
-            'total' => $request->total,
-            'bayar' => $request->bayar,
-            'kembalian' => $request->kembalian,
+            'jam' => $jam,
+            'durasi' => $durasi,
+            'harga' => $harga,
+            'total' => $total,
+            'bayar' => $bayar,
+            'kembalian' => $kembalian,
         ]);
 
-        return redirect()->route('kasir.struk', $trx->id);
+        return redirect()->route('kasir.booking')
+            ->with('success', 'Transaksi berhasil disimpan!')
+            ->with('last_id', $transaksi->id);
     }
 
     public function struk($id)

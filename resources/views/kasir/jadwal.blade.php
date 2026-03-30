@@ -54,43 +54,71 @@
         }
     </style>
 
-    <div class="title">Jadwal Lapangan Hari Ini</div>
+    <div class="title">Jadwal Lapangan</div>
     <div class="subtitle">Tampilan Detail Lapangan Yang Tersedia</div>
+
+    {{-- 🔥 FILTER TANGGAL --}}
+    <form method="GET" style="margin-bottom:15px;">
+        <input type="date" name="tanggal" value="{{ request('tanggal', date('Y-m-d')) }}">
+        <button type="submit">Filter</button>
+    </form>
+
+    @php
+        use App\Models\Transaksi;
+        use App\Models\Lapangan;
+
+        $lapangans = Lapangan::all();
+
+        // 🔥 ambil tanggal dari filter
+        $tanggal = request('tanggal', date('Y-m-d'));
+
+        $transaksiHariIni = Transaksi::whereDate('tanggal', $tanggal)->get();
+
+        function cekBooking($lapangan, $jam, $data)
+        {
+            foreach ($data as $trx) {
+                if ($trx->lapangan == $lapangan) {
+                    $range = explode(' - ', $trx->jam);
+
+                    if (count($range) == 2) {
+                        $start = (int) date('H', strtotime(trim($range[0])));
+                        $end = (int) date('H', strtotime(trim($range[1])));
+
+                        if ($jam >= $start && $jam <= $end) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+    @endphp
 
     <div class="table-box">
 
         <table>
             <tr>
                 <th>Jam</th>
-                <th>Lapangan A</th>
-                <th>Lapangan B</th>
-                <th>Lapangan C</th>
-                <th>Lapangan D</th>
+
+                @foreach ($lapangans as $lap)
+                    <th>{{ $lap->nama }}</th>
+                @endforeach
             </tr>
 
-            @for ($i = 0; $i < 15; $i++)
+            @for ($i = 8; $i <= 22; $i++)
                 <tr>
-                    <td>{{ 8 + $i }}.00</td>
+                    <td>{{ sprintf('%02d.00', $i) }}</td>
 
-                    <td><span class="kosong">Kosong</span></td>
+                    @foreach ($lapangans as $lap)
+                        <td>
+                            @if (cekBooking($lap->nama, $i, $transaksiHariIni))
+                                <span class="booking">Booking</span>
+                            @else
+                                <span class="kosong">Kosong</span>
+                            @endif
+                        </td>
+                    @endforeach
 
-                    <td>
-                        @if ($i % 3 == 0)
-                            <span class="booking">Booking</span>
-                        @else
-                            <span class="kosong">Kosong</span>
-                        @endif
-                    </td>
-
-                    <td><span class="kosong">Kosong</span></td>
-
-                    <td>
-                        @if ($i % 4 == 0)
-                            <span class="booking">Booking</span>
-                        @else
-                            <span class="kosong">Kosong</span>
-                        @endif
-                    </td>
                 </tr>
             @endfor
 

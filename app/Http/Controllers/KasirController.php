@@ -8,6 +8,33 @@ use App\Models\Lapangan;
 
 class KasirController extends Controller
 {
+    public function dashboard()
+    {
+        // 🔥 tanggal hari ini
+        $today = date('Y-m-d');
+
+        // 🔥 jumlah booking hari ini
+        $jumlahBooking = Transaksi::whereDate('tanggal', $today)->count();
+
+        // 🔥 total transaksi hari ini
+        $totalTransaksi = Transaksi::whereDate('tanggal', $today)->sum('total');
+
+        // 🔥 jumlah lapangan
+        $jumlahLapangan = Lapangan::count();
+
+        // 🔥 ambil data jadwal hari ini
+        $transaksiHariIni = Transaksi::whereDate('tanggal', $today)->get();
+        $lapangans = Lapangan::all();
+
+        return view('kasir.dashboard', compact(
+            'jumlahBooking',
+            'totalTransaksi',
+            'jumlahLapangan',
+            'transaksiHariIni',
+            'lapangans'
+        ));
+    }
+
     public function booking()
     {
         $lapangans = Lapangan::all();
@@ -42,7 +69,6 @@ class KasirController extends Controller
         $total = $harga * $durasi;
         $kembalian = $bayar - $total;
 
-        // pastikan format jam tetap string range
         $jam = $request->jam;
 
         $kode = 'TRX-' . now()->format('Ymd') . '-' . rand(100, 999);
@@ -70,5 +96,10 @@ class KasirController extends Controller
     {
         $data = Transaksi::findOrFail($id);
         return view('kasir.struk', compact('data'));
+    }
+
+    public function jadwal()
+    {
+        return view('kasir.jadwal');
     }
 }

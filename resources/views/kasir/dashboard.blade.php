@@ -90,17 +90,17 @@
     <!-- CARDS -->
     <div class="cards">
         <div class="card blue">
-            <h2>8</h2>
+            <h2>{{ $jumlahBooking }}</h2>
             <p>Booking Hari Ini</p>
         </div>
 
         <div class="card green">
-            <h2>Rp.300.000</h2>
+            <h2>Rp {{ number_format($totalTransaksi, 0, ',', '.') }}</h2>
             <p>Total Transaksi</p>
         </div>
 
         <div class="card orange">
-            <h2>4</h2>
+            <h2>{{ $jumlahLapangan }}</h2>
             <p>Lapangan Tersedia</p>
         </div>
     </div>
@@ -113,22 +113,62 @@
 
         <br><br>
 
+        @php
+            function cekBookingDashboard($lapangan, $jam, $data)
+            {
+                foreach ($data as $trx) {
+                    if ($trx->lapangan == $lapangan) {
+                        // RANGE
+                        if (str_contains($trx->jam, '-')) {
+                            $range = explode('-', $trx->jam);
+                            $start = (int) date('H', strtotime(trim($range[0])));
+                            $end = (int) date('H', strtotime(trim($range[1])));
+
+                            if ($jam >= $start && $jam <= $end) {
+                                return true;
+                            }
+                        } else {
+                            // CUSTOM
+                            $arr = explode(',', $trx->jam);
+
+                            foreach ($arr as $j) {
+                                $jamDb = (int) date('H', strtotime(trim($j)));
+
+                                if ($jam == $jamDb) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
+        @endphp
+
         <table>
             <tr>
                 <th>Jam</th>
-                <th>Lapangan A</th>
-                <th>Lapangan B</th>
-                <th>Lapangan C</th>
-                <th>Lapangan D</th>
+
+                @foreach ($lapangans as $lap)
+                    <th>{{ $lap->nama }}</th>
+                @endforeach
             </tr>
 
-            @for ($i = 0; $i < 4; $i++)
+            @for ($i = 8; $i <= 12; $i++)
                 <tr>
-                    <td>08.00</td>
-                    <td><span class="kosong">Kosong</span></td>
-                    <td><span class="booking">Booking</span></td>
-                    <td><span class="kosong">Kosong</span></td>
-                    <td><span class="kosong">Kosong</span></td>
+                    <td>{{ sprintf('%02d.00', $i) }}</td>
+
+                    @foreach ($lapangans as $lap)
+                        <td>
+                            @if (cekBookingDashboard($lap->nama, $i, $transaksiHariIni))
+                                <span class="booking">Booking</span>
+                            @else
+                                <span class="kosong">Kosong</span>
+                            @endif
+                        </td>
+                    @endforeach
+
                 </tr>
             @endfor
         </table>

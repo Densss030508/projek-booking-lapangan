@@ -64,6 +64,24 @@
             object-fit: cover;
             margin-top: 10px;
         }
+
+        .input-harga-wrapper {
+            position: relative;
+        }
+
+        .input-harga-wrapper span {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
+            color: #555;
+            pointer-events: none;
+        }
+
+        .input-harga-wrapper input {
+            padding-left: 28px;
+        }
     </style>
 
     <div class="container-box">
@@ -114,13 +132,20 @@
                     <div>
                         <div class="form-group">
                             <label>Harga Per Jam</label>
-                            <input type="number" name="harga" value="{{ $lapangan->harga }}">
+                            {{-- ✅ Tampilan format ribuan --}}
+                            <div class="input-harga-wrapper">
+                                <span>Rp</span>
+                                <input type="text" id="harga_display"
+                                    value="{{ number_format($lapangan->harga, 0, ',', '.') }}" oninput="formatHarga(this)">
+                            </div>
+                            {{-- ✅ Hidden field kirim angka murni ke server --}}
+                            <input type="hidden" name="harga" id="harga_asli" value="{{ $lapangan->harga }}">
                         </div>
 
                         <div class="form-group">
                             <label>Foto Lapangan</label>
-                            <input type="file" name="foto">
-                            <img src="{{ asset('storage/' . $lapangan->foto) }}" class="preview-img">
+                            <input type="file" name="foto" onchange="previewGambar(event)">
+                            <img id="preview-img" src="{{ asset('storage/' . $lapangan->foto) }}" class="preview-img">
                         </div>
                     </div>
 
@@ -132,5 +157,29 @@
         </div>
 
     </div>
+
+    <script>
+        // ✅ Format harga saat mengetik: 120000 → 120.000
+        function formatHarga(input) {
+            let angka = input.value.replace(/\D/g, '');
+            let formatted = angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            input.value = formatted;
+            document.getElementById('harga_asli').value = angka;
+        }
+
+        // ✅ Preview foto baru saat dipilih
+        function previewGambar(event) {
+            const input = event.target;
+            const preview = document.getElementById('preview-img');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 
 @endsection

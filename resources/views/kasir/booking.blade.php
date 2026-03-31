@@ -79,7 +79,8 @@
         }
 
         .selected {
-            background: #8be0a4 !important;
+            background: #4e73df !important;
+            color: white;
         }
 
         .right input {
@@ -143,6 +144,7 @@
                         onclick="pilihLapangan(this, '{{ $lap->id }}', '{{ $lap->nama }}', '{{ $lap->harga }}')">
                         <img src="{{ asset('storage/' . $lap->foto) }}">
                         <p>{{ $lap->nama }}</p>
+                        {{-- ✅ Format harga: Rp 120.000/Jam --}}
                         <small>Rp {{ number_format($lap->harga, 0, ',', '.') }}/Jam</small>
                     </div>
                 @endforeach
@@ -150,7 +152,7 @@
 
             <h4>2. Pilih Jam</h4>
 
-            <div class="jam-list" id="jamContainer">
+            <div class="jam-list">
                 @foreach ($jamList as $jam)
                     <div class="jam tersedia" data-jam="{{ $jam }}">
                         {{ $jam }}
@@ -166,18 +168,23 @@
                 <input type="hidden" name="lapangan_id" id="lapangan_id">
                 <input type="hidden" name="lapangan" id="lapangan">
                 <input type="hidden" name="jam" id="jam">
+                {{-- Input hidden untuk nilai asli (angka murni) --}}
+                <input type="hidden" name="harga" id="harga_value">
+                <input type="hidden" name="total" id="total_value">
+                <input type="hidden" name="bayar" id="bayar_value">
+                <input type="hidden" name="kembalian" id="kembalian_value">
 
-                <!-- 🔥 FILTER TANGGAL -->
                 <input type="date" name="tanggal" id="tanggal" value="{{ date('Y-m-d') }}" required>
 
                 <input type="text" name="nama" placeholder="Nama" required>
                 <input type="text" name="no_hp" placeholder="No HP" required>
 
-                <input type="text" id="harga" name="harga" readonly placeholder="Harga per jam">
+                {{-- Tampilan saja (readonly, format ribuan) --}}
+                <input type="text" id="harga_display" readonly placeholder="Harga per jam">
                 <input type="text" name="durasi" id="durasi" readonly placeholder="Durasi (auto)">
-                <input type="text" name="total" id="total" readonly placeholder="Total">
-                <input type="text" name="bayar" id="bayar" placeholder="Bayar" required>
-                <input type="text" name="kembalian" id="kembalian" readonly placeholder="Kembalian">
+                <input type="text" id="total_display" readonly placeholder="Total">
+                <input type="text" id="bayar_display" placeholder="Bayar" oninput="hitungKembalian(this)" required>
+                <input type="text" id="kembalian_display" readonly placeholder="Kembalian">
 
                 <button type="submit">Simpan Transaksi</button>
             </form>
@@ -189,19 +196,14 @@
         let selectedJam = [];
         let hargaAsli = 0;
 
-        // 🔥 ambil semua transaksi dari controller
         let semuaTransaksi = @json($transaksi);
         let transaksi = [];
 
         let tanggalInput = document.getElementById('tanggal');
 
-        // pertama kali load
         filterTanggal();
 
-        // saat tanggal berubah
-        tanggalInput.addEventListener('change', function() {
-            filterTanggal();
-        });
+        tanggalInput.addEventListener('change', filterTanggal);
 
         function filterTanggal() {
             let tgl = tanggalInput.value;
@@ -211,7 +213,8 @@
             selectedJam = [];
             document.getElementById('jam').value = '';
             document.getElementById('durasi').value = '';
-            document.getElementById('total').value = '';
+            document.getElementById('total_display').value = '';
+            document.getElementById('total_value').value = '';
 
             document.querySelectorAll('.card.active').forEach(el => {
                 let nama = el.querySelector('p').innerText;
@@ -219,13 +222,9 @@
             });
         }
 
-        function formatRupiah(angka) {
-            angka = angka.toString().replace(/\D/g, '');
-            return angka.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        }
-
-        function parseRupiah(angka) {
-            return parseInt(angka.toString().replace(/\./g, '')) || 0;
+        // ✅ Format angka jadi ribuan: 120000 → 120.000
+        function formatRibuan(angka) {
+            return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
 
         function pilihLapangan(el, id, nama, harga) {
@@ -236,46 +235,59 @@
             document.getElementById('lapangan').value = nama;
 
             hargaAsli = parseInt(harga);
-            document.getElementById('harga').value = formatRupiah(harga);
+
+            // ✅ Tampilan harga format Rp 120.000/Jam
+            document.getElementById('harga_display').value = 'Rp ' + formatRibuan(hargaAsli) + '/Jam';
+            document.getElementById('harga_value').value = hargaAsli;
 
             selectedJam = [];
             renderJam(nama);
-            hitung();
         }
 
         function renderJam(namaLapangan) {
-            let jamDivs = document.querySelectorAll('.jam');
+            document.querySelectorAll('.jam').forEach(div => {
 
-            jamDivs.forEach(div => {
                 let jam = div.dataset.jam;
+                let jamInt = parseInt(jam);
+
                 div.classList.remove('booked', 'selected');
                 div.classList.add('tersedia');
 
                 transaksi.forEach(trx => {
                     if (trx.lapangan === namaLapangan) {
-                        let range = trx.jam.split(' - ');
-                        if (range.length === 2) {
+
+                        // 🔥 RANGE
+                        if (trx.jam.includes('-')) {
+                            let range = trx.jam.split('-');
                             let start = parseInt(range[0]);
                             let end = parseInt(range[1]);
-                            let jamInt = parseInt(jam);
 
                             if (jamInt >= start && jamInt <= end) {
                                 div.classList.remove('tersedia');
                                 div.classList.add('booked');
                             }
+                        } else {
+                            // 🔥 CUSTOM
+                            let arr = trx.jam.split(',');
+                            arr.forEach(j => {
+                                if (jamInt === parseInt(j)) {
+                                    div.classList.remove('tersedia');
+                                    div.classList.add('booked');
+                                }
+                            });
                         }
                     }
                 });
 
+                // 🔥 DISABLE CLICK kalau booked
                 div.onclick = function() {
-                    pilihJam(this, jam);
+                    if (div.classList.contains('booked')) return;
+                    pilihJam(div, jam);
                 };
             });
         }
 
         function pilihJam(el, jam) {
-            if (el.classList.contains('booked')) return;
-
             if (selectedJam.includes(jam)) {
                 selectedJam = selectedJam.filter(j => j !== jam);
                 el.classList.remove('selected');
@@ -286,44 +298,69 @@
 
             selectedJam.sort();
 
-            if (selectedJam.length > 0) {
-                let jamAwal = selectedJam[0];
-                let jamAkhir = selectedJam[selectedJam.length - 1];
-
+            if (selectedJam.length > 2) {
                 document.getElementById('jam').value =
-                    selectedJam.length > 1 ?
-                    jamAwal + ' - ' + jamAkhir :
-                    jamAwal;
+                    selectedJam[0] + ' - ' + selectedJam[selectedJam.length - 1];
+            } else {
+                document.getElementById('jam').value = selectedJam.join(',');
             }
 
             document.getElementById('durasi').value = selectedJam.length;
 
-            hitung();
+            let total = hargaAsli * selectedJam.length;
+
+            // ✅ Tampilan total format Rp 240.000
+            document.getElementById('total_display').value = 'Rp ' + formatRibuan(total);
+            document.getElementById('total_value').value = total;
+
+            // Reset bayar & kembalian saat jam berubah
+            document.getElementById('bayar_display').value = '';
+            document.getElementById('bayar_value').value = '';
+            document.getElementById('kembalian_display').value = '';
+            document.getElementById('kembalian_value').value = '';
         }
 
-        function hitung() {
-            let durasi = selectedJam.length;
-            let total = hargaAsli * durasi;
+        // ✅ Hitung kembalian otomatis saat input bayar
+        function hitungKembalian(input) {
+            // Ambil angka murni dari input bayar (hapus titik)
+            let angkaMurni = input.value.replace(/\D/g, '');
 
-            document.getElementById('total').value = formatRupiah(total);
+            // Format tampilan bayar
+            input.value = formatRibuan(angkaMurni);
+
+            // Simpan ke hidden
+            document.getElementById('bayar_value').value = angkaMurni;
+
+            let bayar = parseInt(angkaMurni) || 0;
+            let total = parseInt(document.getElementById('total_value').value) || 0;
+
+            let kembalian = bayar - total;
+
+            if (kembalian >= 0) {
+                document.getElementById('kembalian_display').value = 'Rp ' + formatRibuan(kembalian);
+                document.getElementById('kembalian_value').value = kembalian;
+            } else {
+                document.getElementById('kembalian_display').value = 'Kurang: Rp ' + formatRibuan(Math.abs(kembalian));
+                document.getElementById('kembalian_value').value = kembalian;
+            }
         }
-
-        document.getElementById('bayar').addEventListener('input', function() {
-            this.value = formatRupiah(this.value);
-
-            let bayar = parseRupiah(this.value);
-            let total = parseRupiah(document.getElementById('total').value);
-
-            let kembali = bayar - total;
-            document.getElementById('kembalian').value = kembali > 0 ? formatRupiah(kembali) : 0;
-        });
 
         function validasiBayar() {
-            let bayar = parseRupiah(document.getElementById('bayar').value);
-            let total = parseRupiah(document.getElementById('total').value);
+            let bayar = parseInt(document.getElementById('bayar_value').value) || 0;
+            let total = parseInt(document.getElementById('total_value').value) || 0;
+
+            if (!document.getElementById('lapangan_id').value) {
+                alert('Pilih lapangan terlebih dahulu!');
+                return false;
+            }
+
+            if (!document.getElementById('jam').value) {
+                alert('Pilih jam terlebih dahulu!');
+                return false;
+            }
 
             if (bayar < total) {
-                alert('Uang kurang! Tidak bisa simpan');
+                alert('Uang kurang! Total: Rp ' + formatRibuan(total) + ', Bayar: Rp ' + formatRibuan(bayar));
                 return false;
             }
             return true;

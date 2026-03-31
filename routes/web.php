@@ -15,7 +15,7 @@ Route::get('/', fn() => view('welcome'));
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 
-/* LOGOUT (FIX POST) */
+/* LOGOUT */
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 
@@ -28,12 +28,8 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/lapangan/create', [ProductController::class, 'create'])->name('lapangan.create');
     Route::post('/lapangan/store', [ProductController::class, 'store'])->name('lapangan.store');
 
-    // 🔥 TAMBAHAN EDIT (INI YANG KURANG)
     Route::get('/lapangan/{id}/edit', [ProductController::class, 'edit'])->name('lapangan.edit');
-
     Route::put('/lapangan/{id}', [ProductController::class, 'update'])->name('lapangan.update');
-
-    // 🔥 BONUS HAPUS (BIAR LENGKAP)
     Route::delete('/lapangan/{id}', [ProductController::class, 'destroy'])->name('lapangan.destroy');
 
     Route::get('/pengguna', [UserController::class, 'index'])->name('pengguna.index');
@@ -49,23 +45,21 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::put('/pengguna/{id}', [UserController::class, 'update'])->name('pengguna.update');
     Route::delete('/pengguna/{id}', [UserController::class, 'destroy'])->name('pengguna.destroy');
 
-    Route::get('/laporan', fn() => view('admin.laporan.index'))->name('laporan.index');
+    Route::get('/laporan', [AdminController::class, 'laporan'])->name('laporan.index');
 });
 
 
 /* KASIR */
 Route::middleware('auth')->prefix('kasir')->group(function () {
 
-    Route::get('/dashboard', fn() => view('kasir.dashboard'))->name('kasir.dashboard');
-    Route::get('/jadwal', fn() => view('kasir.jadwal'))->name('kasir.jadwal');
+    // ✅ FIX - pakai controller supaya variabel terkirim ke view
+    Route::get('/dashboard', [KasirController::class, 'dashboard'])->name('kasir.dashboard');
+    Route::get('/jadwal', [KasirController::class, 'jadwal'])->name('kasir.jadwal');
 
-    // transaksi dinamis dari database
     Route::get('/transaksi', [KasirController::class, 'transaksi'])->name('kasir.transaksi');
-
     Route::get('/booking', [KasirController::class, 'booking'])->name('kasir.booking');
 
     Route::post('/transaksi', [KasirController::class, 'store'])->name('kasir.store');
-
     Route::get('/struk/{id}', [KasirController::class, 'struk'])->name('kasir.struk');
 });
 

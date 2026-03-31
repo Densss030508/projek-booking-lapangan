@@ -78,18 +78,33 @@
         {
             foreach ($data as $trx) {
                 if ($trx->lapangan == $lapangan) {
-                    $range = explode(' - ', $trx->jam);
+                    // 🔥 CEK RANGE
+                    if (str_contains($trx->jam, '-')) {
+                        $range = explode('-', $trx->jam);
 
-                    if (count($range) == 2) {
-                        $start = (int) date('H', strtotime(trim($range[0])));
-                        $end = (int) date('H', strtotime(trim($range[1])));
+                        if (count($range) == 2) {
+                            $start = (int) date('H', strtotime(trim($range[0])));
+                            $end = (int) date('H', strtotime(trim($range[1])));
 
-                        if ($jam >= $start && $jam <= $end) {
-                            return true;
+                            if ($jam >= $start && $jam <= $end) {
+                                return true;
+                            }
+                        }
+                    } else {
+                        // 🔥 CEK CUSTOM
+                        $jamArray = explode(',', $trx->jam);
+
+                        foreach ($jamArray as $j) {
+                            $jamDb = (int) date('H', strtotime(trim($j)));
+
+                            if ($jam == $jamDb) {
+                                return true;
+                            }
                         }
                     }
                 }
             }
+
             return false;
         }
     @endphp

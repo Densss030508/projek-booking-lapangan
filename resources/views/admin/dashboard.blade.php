@@ -80,10 +80,12 @@
         .logout-btn {
             background: red;
             border: none;
-            padding: 6px 14px;
-            border-radius: 20px;
+            padding: 8px;
+            border-radius: 5px;
             color: white;
             cursor: pointer;
+            width: 100%;
+            font-size: 14px;
         }
 
         /* MAIN */

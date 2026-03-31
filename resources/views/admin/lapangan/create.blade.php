@@ -84,6 +84,28 @@
             justify-content: flex-end;
             margin-top: 20px;
         }
+
+        .input-harga-wrapper {
+            position: relative;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        .input-harga-wrapper span {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
+            color: #555;
+            pointer-events: none;
+        }
+
+        .input-harga-wrapper input {
+            padding-left: 28px;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
     </style>
 
     <div class="container">
@@ -121,7 +143,13 @@
                 <!-- KANAN -->
                 <div>
                     <label>Harga Per Jam</label>
-                    <input type="number" name="harga" required>
+                    <!-- INPUT TAMPIL: format ribuan, hanya untuk display -->
+                    <div class="input-harga-wrapper">
+                        <span>Rp</span>
+                        <input type="text" id="harga_display" placeholder="Contoh: 120.000" oninput="formatHarga(this)">
+                    </div>
+                    <!-- INPUT ASLI: angka murni yang dikirim ke server -->
+                    <input type="hidden" name="harga" id="harga_asli">
 
                     <label>Foto Lapangan</label>
                     <input type="file" name="foto" onchange="previewImage(event)" required>
@@ -150,6 +178,21 @@
     </div>
 
     <script>
+        // Format input harga menjadi 120.000 saat mengetik
+        function formatHarga(input) {
+            // Ambil hanya angka
+            let angka = input.value.replace(/\D/g, '');
+
+            // Format dengan titik ribuan
+            let formatted = angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+            // Tampilkan yang sudah diformat
+            input.value = formatted;
+
+            // Simpan angka murni ke input hidden
+            document.getElementById('harga_asli').value = angka;
+        }
+
         function previewImage(event) {
             const input = event.target;
             const preview = document.getElementById('preview-img');

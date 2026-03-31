@@ -57,13 +57,14 @@
         }
 
         .logout-btn {
-            margin-top: 10px;
             background: red;
-            color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 8px;
+            border-radius: 5px;
+            color: white;
             cursor: pointer;
+            width: 100%;
+            font-size: 14px;
         }
 
         .content {
@@ -83,11 +84,14 @@
             margin-bottom: 15px;
         }
 
+        /* 🔥 FILTER RAPIH */
         .filter {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .filter-left {
@@ -97,9 +101,9 @@
 
         .filter input,
         .filter select {
-            padding: 6px 8px;
+            padding: 8px 10px;
             border: 1px solid #ccc;
-            border-radius: 4px;
+            border-radius: 5px;
         }
 
         .search {
@@ -107,14 +111,30 @@
             align-items: center;
             gap: 5px;
             background: white;
-            padding: 5px 10px;
+            padding: 8px 10px;
             border-radius: 5px;
             border: 1px solid #ccc;
+            min-width: 250px;
         }
 
         .search input {
             border: none;
             outline: none;
+            width: 100%;
+        }
+
+        /* 🔥 BUTTON RAPIH */
+        .btn-filter {
+            padding: 8px 15px;
+            background: #4e73df;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-filter:hover {
+            background: #2e59d9;
         }
 
         .table-box {
@@ -177,7 +197,7 @@
 
         <div class="bottom">
             <p>Kasir</p>
-            <small>{{ auth()->user()->nama ?? 'Dahlan' }}</small>
+            <small>{{ auth()->user()->nama ?? 'User' }}</small>
 
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
@@ -188,7 +208,6 @@
 
     <div class="content">
 
-        {{-- ✅ NOTIF --}}
         @if (session('success'))
             <div
                 style="background:#4CAF50;color:white;padding:12px;margin-bottom:15px;border-radius:6px;text-align:center;">
@@ -199,20 +218,69 @@
         <div class="title">Riwayat Transaksi</div>
         <div class="subtitle">Daftar Transaksi Yang Telah Dilakukan</div>
 
-        <div class="filter">
-            <div class="filter-left">
-                <input type="date">
-                <select>
-                    <option>Semua</option>
-                    <option>Hari Ini</option>
-                </select>
-            </div>
+        <!-- 🔥 FILTER -->
+        <form method="GET">
+            <div class="filter">
 
-            <div class="search">
-                🔍
-                <input type="text" placeholder="Cari Nama Pelanggan / Id. Transaksi">
+                <div class="filter-left">
+                    <input type="date" name="tanggal" value="{{ request('tanggal') }}">
+
+                    <select name="filter">
+                        <option value="">Semua</option>
+                        <option value="hari" {{ request('filter') == 'hari' ? 'selected' : '' }}>Hari Ini</option>
+                        <option value="bulan" {{ request('filter') == 'bulan' ? 'selected' : '' }}>Bulan Ini</option>
+                        <option value="tahun" {{ request('filter') == 'tahun' ? 'selected' : '' }}>Tahun Ini</option>
+                    </select>
+                </div>
+
+                <div class="search">
+                    🔍
+                    <input type="text" name="search" placeholder="Cari Nama / ID Transaksi"
+                        value="{{ request('search') }}">
+                </div>
+
+                <button type="submit" class="btn-filter">Filter</button>
+
             </div>
-        </div>
+        </form>
+
+        @php
+            $data = $transaksi;
+
+            // 🔍 SEARCH (NAMA + KODE)
+            if (request('search')) {
+                $keyword = strtolower(request('search'));
+
+                $data = $data->filter(function ($item) use ($keyword) {
+                    return str_contains(strtolower($item->nama), $keyword) ||
+                        str_contains(strtolower($item->kode_transaksi), $keyword);
+                });
+            }
+
+            // 📅 FILTER TANGGAL SPESIFIK
+            if (request('tanggal')) {
+                $data = $data->where('tanggal', request('tanggal'));
+            }
+
+            // 📅 HARI INI
+            if (request('filter') == 'hari') {
+                $data = $data->where('tanggal', date('Y-m-d'));
+            }
+
+            // 📅 BULAN
+            if (request('filter') == 'bulan') {
+                $data = $data->filter(function ($item) {
+                    return date('Y-m', strtotime($item->tanggal)) == date('Y-m');
+                });
+            }
+
+            // 📅 TAHUN
+            if (request('filter') == 'tahun') {
+                $data = $data->filter(function ($item) {
+                    return date('Y', strtotime($item->tanggal)) == date('Y');
+                });
+            }
+        @endphp
 
         <div class="table-box">
             <table>
@@ -230,10 +298,10 @@
                     <th>Aksi</th>
                 </tr>
 
-                @forelse ($transaksi as $item)
+                @forelse ($data as $item)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->created_at->format('d M Y') }}</td>
+                        <td>{{ date('d M Y', strtotime($item->tanggal)) }}</td>
                         <td>{{ $item->lapangan }}</td>
                         <td>{{ $item->jam }}</td>
                         <td>{{ $item->durasi }} Jam</td>

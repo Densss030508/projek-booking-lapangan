@@ -77,13 +77,14 @@
         }
 
         .logout-btn {
-            margin-top: 10px;
             background: red;
-            color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 8px;
+            border-radius: 5px;
+            color: white;
             cursor: pointer;
+            width: 100%;
+            font-size: 14px;
         }
 
         /* CONTENT */
@@ -109,7 +110,7 @@
             <div class="top">
 
                 <div class="logo">
-                    <img src="{{ asset('logo.png') }}" alt="Logo">
+                    <img src="{{ asset('images/kixa.png') }}" alt="Logo">
                 </div>
 
                 <div class="menu">

@@ -11,7 +11,7 @@ class LapanganController extends Controller
     // 🔹 Tampilkan semua lapangan
     public function index()
     {
-        $lapangan = Lapangan::latest()->get(); // biar urut terbaru
+        $lapangan = Lapangan::latest()->get();
         return view('admin.lapangan.index', compact('lapangan'));
     }
 
@@ -25,13 +25,11 @@ class LapanganController extends Controller
             'foto' => 'required|image|mimes:jpg,jpeg,png|max:2048'
         ]);
 
-        // 🔥 SIMPAN FOTO (AMAN)
         $fotoPath = null;
         if ($request->hasFile('foto')) {
             $fotoPath = $request->file('foto')->store('lapangan', 'public');
         }
 
-        // 🔥 SIMPAN KE DATABASE
         Lapangan::create([
             'nama' => $request->nama,
             'status' => $request->status,
@@ -62,19 +60,13 @@ class LapanganController extends Controller
             'harga' => 'required|numeric',
         ]);
 
-        // 🔥 CEK FOTO BARU
         if ($request->hasFile('foto')) {
-
-            // hapus lama
             if ($lapangan->foto && Storage::exists('public/' . $lapangan->foto)) {
                 Storage::delete('public/' . $lapangan->foto);
             }
-
-            // simpan baru
             $lapangan->foto = $request->file('foto')->store('lapangan', 'public');
         }
 
-        // 🔥 UPDATE DATA
         $lapangan->update([
             'nama' => $request->nama,
             'status' => $request->status,
@@ -89,7 +81,6 @@ class LapanganController extends Controller
     {
         $lapangan = Lapangan::findOrFail($id);
 
-        // hapus foto
         if ($lapangan->foto && Storage::exists('public/' . $lapangan->foto)) {
             Storage::delete('public/' . $lapangan->foto);
         }
@@ -97,5 +88,23 @@ class LapanganController extends Controller
         $lapangan->delete();
 
         return redirect()->back()->with('success', 'Lapangan berhasil dihapus!');
+    }
+
+    // 🔹 Toggle aktif/nonaktif lapangan (tanpa hapus) ← BARU
+    public function toggleActive($id)
+    {
+        $lapangan = Lapangan::findOrFail($id);
+
+        if ($lapangan->status === 'nonaktif') {
+            $lapangan->status = 'tersedia';
+            $pesan = 'diaktifkan kembali';
+        } else {
+            $lapangan->status = 'nonaktif';
+            $pesan = 'dinonaktifkan';
+        }
+
+        $lapangan->save();
+
+        return back()->with('success', "Lapangan berhasil {$pesan}!");
     }
 }

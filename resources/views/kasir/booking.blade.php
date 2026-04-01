@@ -112,11 +112,27 @@
             border-radius: 6px;
             margin-top: 10px;
         }
+
+        {{-- 🔥 Style notifikasi error --}} .alert-error {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
     </style>
 
     @if (session('success'))
         <div style="background:#4CAF50;color:white;padding:10px;margin-bottom:10px;border-radius:5px;text-align:center;">
             {{ session('success') }}
+        </div>
+    @endif
+
+    {{-- 🔥 Notifikasi error lapangan nonaktif --}}
+    @if (session('error'))
+        <div class="alert-error">
+            ⚠️ {{ session('error') }}
         </div>
     @endif
 
@@ -138,17 +154,29 @@
         <div class="left">
             <h4>1. Pilih Lapangan</h4>
 
-            <div class="lapangan">
-                @foreach ($lapangans as $lap)
-                    <div class="card"
-                        onclick="pilihLapangan(this, '{{ $lap->id }}', '{{ $lap->nama }}', '{{ $lap->harga }}')">
-                        <img src="{{ asset('storage/' . $lap->foto) }}">
-                        <p>{{ $lap->nama }}</p>
-                        {{-- ✅ Format harga: Rp 120.000/Jam --}}
-                        <small>Rp {{ number_format($lap->harga, 0, ',', '.') }}/Jam</small>
-                    </div>
-                @endforeach
-            </div>
+            {{-- 🔥 Cek jika tidak ada lapangan aktif --}}
+            @if ($lapangans->isEmpty())
+                <div style="background:#f39c12; color:white; padding:15px; border-radius:8px; text-align:center;">
+                    ⚠️ Tidak ada lapangan yang tersedia saat ini.
+                </div>
+            @else
+                <div class="lapangan">
+                    @foreach ($lapangans as $lap)
+                        <div class="card"
+                            onclick="pilihLapangan(this, '{{ $lap->id }}', '{{ $lap->nama }}', '{{ $lap->harga }}')">
+                            <img src="{{ asset('storage/' . $lap->foto) }}">
+                            <p>{{ $lap->nama }}</p>
+                            <small>Rp {{ number_format($lap->harga, 0, ',', '.') }}/Jam</small>
+                            {{-- 🔥 Badge status --}}
+                            @if ($lap->status === 'tersedia')
+                                <span style="font-size:11px; color:#2ecc71;">✅ Tersedia</span>
+                            @else
+                                <span style="font-size:11px; color:#f39c12;">⏳ Tidak Tersedia</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @endif
 
             <h4>2. Pilih Jam</h4>
 
@@ -168,7 +196,6 @@
                 <input type="hidden" name="lapangan_id" id="lapangan_id">
                 <input type="hidden" name="lapangan" id="lapangan">
                 <input type="hidden" name="jam" id="jam">
-                {{-- Input hidden untuk nilai asli (angka murni) --}}
                 <input type="hidden" name="harga" id="harga_value">
                 <input type="hidden" name="total" id="total_value">
                 <input type="hidden" name="bayar" id="bayar_value">
@@ -179,7 +206,6 @@
                 <input type="text" name="nama" placeholder="Nama" required>
                 <input type="text" name="no_hp" placeholder="No HP" required>
 
-                {{-- Tampilan saja (readonly, format ribuan) --}}
                 <input type="text" id="harga_display" readonly placeholder="Harga per jam">
                 <input type="text" name="durasi" id="durasi" readonly placeholder="Durasi (auto)">
                 <input type="text" id="total_display" readonly placeholder="Total">
@@ -222,7 +248,6 @@
             });
         }
 
-        // ✅ Format angka jadi ribuan: 120000 → 120.000
         function formatRibuan(angka) {
             return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
@@ -236,7 +261,6 @@
 
             hargaAsli = parseInt(harga);
 
-            // ✅ Tampilan harga format Rp 120.000/Jam
             document.getElementById('harga_display').value = 'Rp ' + formatRibuan(hargaAsli) + '/Jam';
             document.getElementById('harga_value').value = hargaAsli;
 
@@ -256,7 +280,6 @@
                 transaksi.forEach(trx => {
                     if (trx.lapangan === namaLapangan) {
 
-                        // 🔥 RANGE
                         if (trx.jam.includes('-')) {
                             let range = trx.jam.split('-');
                             let start = parseInt(range[0]);
@@ -267,7 +290,6 @@
                                 div.classList.add('booked');
                             }
                         } else {
-                            // 🔥 CUSTOM
                             let arr = trx.jam.split(',');
                             arr.forEach(j => {
                                 if (jamInt === parseInt(j)) {
@@ -279,7 +301,6 @@
                     }
                 });
 
-                // 🔥 DISABLE CLICK kalau booked
                 div.onclick = function() {
                     if (div.classList.contains('booked')) return;
                     pilihJam(div, jam);
@@ -309,26 +330,20 @@
 
             let total = hargaAsli * selectedJam.length;
 
-            // ✅ Tampilan total format Rp 240.000
             document.getElementById('total_display').value = 'Rp ' + formatRibuan(total);
             document.getElementById('total_value').value = total;
 
-            // Reset bayar & kembalian saat jam berubah
             document.getElementById('bayar_display').value = '';
             document.getElementById('bayar_value').value = '';
             document.getElementById('kembalian_display').value = '';
             document.getElementById('kembalian_value').value = '';
         }
 
-        // ✅ Hitung kembalian otomatis saat input bayar
         function hitungKembalian(input) {
-            // Ambil angka murni dari input bayar (hapus titik)
             let angkaMurni = input.value.replace(/\D/g, '');
 
-            // Format tampilan bayar
             input.value = formatRibuan(angkaMurni);
 
-            // Simpan ke hidden
             document.getElementById('bayar_value').value = angkaMurni;
 
             let bayar = parseInt(angkaMurni) || 0;

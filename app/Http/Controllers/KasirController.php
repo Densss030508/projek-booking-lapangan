@@ -77,7 +77,8 @@ class KasirController extends Controller
 
     public function booking()
     {
-        $lapangans = Lapangan::all();
+        // 🔥 Hanya tampilkan lapangan yang TIDAK nonaktif
+        $lapangans = Lapangan::where('status', '!=', 'nonaktif')->get();
         $transaksi = Transaksi::all();
 
         return view('kasir.booking', compact('lapangans', 'transaksi'));
@@ -101,6 +102,17 @@ class KasirController extends Controller
             'bayar'    => 'required',
             'tanggal'  => 'required',
         ]);
+
+        // 🔥 Cek lapangan tidak nonaktif sebelum simpan
+        $lapangan = Lapangan::where('nama', $request->lapangan)
+            ->where('status', '!=', 'nonaktif')
+            ->first();
+
+        if (!$lapangan) {
+            return back()
+                ->withInput()
+                ->with('error', 'Lapangan tidak tersedia atau sedang dinonaktifkan!');
+        }
 
         $harga     = (int) str_replace('.', '', $request->harga);
         $bayar     = (int) str_replace('.', '', $request->bayar);

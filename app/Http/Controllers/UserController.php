@@ -28,7 +28,7 @@ class UserController extends Controller
 
         User::create([
             'nama' => $request->nama,
-            'username' => $request->email, // sync username = email
+            'username' => $request->email,
             'email' => $request->email,
             'role' => $request->role,
             'status' => $request->status,
@@ -54,7 +54,7 @@ class UserController extends Controller
 
         $user->update([
             'nama' => $request->nama,
-            'username' => $request->email, // 🔥 update juga username
+            'username' => $request->email,
             'email' => $request->email,
             'role' => $request->role,
             'status' => $request->status,
@@ -71,7 +71,6 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // tidak boleh hapus diri sendiri
         if (Auth::id() == $user->id) {
             return back()->with('error', 'Tidak bisa hapus akun sendiri');
         }
@@ -80,5 +79,21 @@ class UserController extends Controller
 
         return redirect()->route('pengguna.index')
             ->with('success', 'User berhasil dihapus!');
+    }
+
+    // 🔹 Toggle aktif/nonaktif user (tanpa hapus) ← BARU
+    public function toggleStatus($id)
+    {
+        $user = User::findOrFail($id);
+
+        if (Auth::id() == $user->id) {
+            return back()->with('error', 'Tidak bisa menonaktifkan akun sendiri!');
+        }
+
+        $user->status = ($user->status === 'aktif') ? 'nonaktif' : 'aktif';
+        $user->save();
+
+        $pesan = $user->status === 'aktif' ? 'diaktifkan' : 'dinonaktifkan';
+        return back()->with('success', "User berhasil {$pesan}!");
     }
 }

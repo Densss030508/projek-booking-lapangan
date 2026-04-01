@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\KasirController;
+use App\Http\Controllers\OwnerController;
 
 /* HOME */
 
@@ -55,6 +56,7 @@ Route::middleware('auth')->prefix('kasir')->group(function () {
     // ✅ FIX - pakai controller supaya variabel terkirim ke view
     Route::get('/dashboard', [KasirController::class, 'dashboard'])->name('kasir.dashboard');
     Route::get('/jadwal', [KasirController::class, 'jadwal'])->name('kasir.jadwal');
+    Route::get('/kasir/dashboard-filter', [KasirController::class, 'dashboardFilter'])->name('kasir.dashboardFilter');
 
     Route::get('/transaksi', [KasirController::class, 'transaksi'])->name('kasir.transaksi');
     Route::get('/booking', [KasirController::class, 'booking'])->name('kasir.booking');
@@ -66,10 +68,11 @@ Route::middleware('auth')->prefix('kasir')->group(function () {
 
 /* OWNER */
 Route::middleware('auth')->prefix('owner')->group(function () {
-
-    Route::get('/dashboard', fn() => view('owner.dashboard'))->name('owner.dashboard');
-    Route::get('/produk', fn() => view('owner.produk'))->name('owner.produk');
-    Route::get('/detail', fn() => view('owner.detail'))->name('owner.detail');
-    Route::get('/laporan', fn() => view('owner.laporan'))->name('owner.laporan');
-    Route::get('/aktivitas', fn() => view('owner.aktivitas'))->name('owner.aktivitas');
+    Route::get('/dashboard',      [OwnerController::class, 'dashboard'])->name('owner.dashboard');
+    Route::get('/produk',         [OwnerController::class, 'produk'])->name('owner.produk');
+    Route::get('/detail/{id}',    [OwnerController::class, 'detail'])->name('owner.detail');
+    Route::get('/laporan',        [OwnerController::class, 'laporan'])->name('owner.laporan');
+    Route::get('/laporan/excel',  [OwnerController::class, 'exportExcel'])->name('owner.exportExcel');
+    Route::get('/laporan/pdf',    [OwnerController::class, 'exportPdf'])->name('owner.exportPdf');
+    Route::get('/aktivitas',      [OwnerController::class, 'aktivitas'])->name('owner.aktivitas');
 });

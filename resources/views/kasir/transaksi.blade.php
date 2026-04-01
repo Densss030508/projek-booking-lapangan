@@ -18,6 +18,7 @@
             background: #4aa3b5;
         }
 
+        /* ✅ SIDEBAR FIX (TIDAK IKUT SCROLL) */
         .sidebar {
             width: 230px;
             height: 100vh;
@@ -26,6 +27,9 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            position: fixed;
+            left: 0;
+            top: 0;
         }
 
         .top {
@@ -35,6 +39,13 @@
         .logo {
             text-align: center;
             margin-bottom: 20px;
+        }
+
+        .logo img {
+            max-width: 120px;
+            width: 100%;
+            height: auto;
+            object-fit: contain;
         }
 
         .menu a {
@@ -67,10 +78,13 @@
             font-size: 14px;
         }
 
+        /* ✅ CONTENT DIGESER */
         .content {
+            margin-left: 230px;
             flex: 1;
             padding: 20px;
             background: #e5e5e5;
+            min-height: 100vh;
         }
 
         .title {
@@ -84,7 +98,6 @@
             margin-bottom: 15px;
         }
 
-        /* 🔥 FILTER RAPIH */
         .filter {
             display: flex;
             justify-content: space-between;
@@ -123,7 +136,6 @@
             width: 100%;
         }
 
-        /* 🔥 BUTTON RAPIH */
         .btn-filter {
             padding: 8px 15px;
             background: #4e73df;
@@ -184,7 +196,7 @@
     <div class="sidebar">
         <div class="top">
             <div class="logo">
-                <img src="{{ asset('logo.png') }}" width="70">
+                <img src="{{ asset('images/kixa.png') }}">
             </div>
 
             <div class="menu">
@@ -218,7 +230,6 @@
         <div class="title">Riwayat Transaksi</div>
         <div class="subtitle">Daftar Transaksi Yang Telah Dilakukan</div>
 
-        <!-- 🔥 FILTER -->
         <form method="GET">
             <div class="filter">
 
@@ -245,9 +256,10 @@
         </form>
 
         @php
+            use Carbon\Carbon;
+
             $data = $transaksi;
 
-            // 🔍 SEARCH (NAMA + KODE)
             if (request('search')) {
                 $keyword = strtolower(request('search'));
 
@@ -257,27 +269,26 @@
                 });
             }
 
-            // 📅 FILTER TANGGAL SPESIFIK
             if (request('tanggal')) {
                 $data = $data->where('tanggal', request('tanggal'));
             }
 
-            // 📅 HARI INI
             if (request('filter') == 'hari') {
-                $data = $data->where('tanggal', date('Y-m-d'));
+                $data = $data->where('tanggal', Carbon::today()->toDateString());
             }
 
-            // 📅 BULAN
             if (request('filter') == 'bulan') {
-                $data = $data->filter(function ($item) {
-                    return date('Y-m', strtotime($item->tanggal)) == date('Y-m');
+                $start = Carbon::now()->startOfMonth();
+                $end = Carbon::now()->endOfMonth();
+
+                $data = $data->filter(function ($item) use ($start, $end) {
+                    return Carbon::parse($item->tanggal)->between($start, $end);
                 });
             }
 
-            // 📅 TAHUN
             if (request('filter') == 'tahun') {
                 $data = $data->filter(function ($item) {
-                    return date('Y', strtotime($item->tanggal)) == date('Y');
+                    return Carbon::parse($item->tanggal)->year == Carbon::now()->year;
                 });
             }
         @endphp
@@ -301,7 +312,7 @@
                 @forelse ($data as $item)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
-                        <td>{{ date('d M Y', strtotime($item->tanggal)) }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}</td>
                         <td>{{ $item->lapangan }}</td>
                         <td>{{ $item->jam }}</td>
                         <td>{{ $item->durasi }} Jam</td>

@@ -45,7 +45,6 @@
         }
 
         /* HEADER */
-
         .header {
             display: flex;
             justify-content: space-between;
@@ -67,7 +66,6 @@
         }
 
         /* GRID LAPANGAN */
-
         .lapangan-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -75,7 +73,6 @@
         }
 
         /* CARD */
-
         .card {
             background: #efefef;
             padding: 15px;
@@ -126,11 +123,9 @@
 
         body {
             background: #dcdcdc;
-            display: flex;
         }
 
         /* SIDEBAR */
-
         .sidebar {
             width: 230px;
             background: linear-gradient(180deg, #4f74c8, #3b63c5);
@@ -140,6 +135,12 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+
+            /* 🔥 FIX SIDEBAR DIAM */
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
         }
 
         .logo {
@@ -152,7 +153,6 @@
         }
 
         /* MENU */
-
         .menu a {
             display: block;
             padding: 10px;
@@ -171,7 +171,6 @@
         }
 
         /* PROFILE */
-
         .profile {
             border-top: 1px solid rgba(255, 255, 255, 0.4);
             padding-top: 15px;
@@ -200,28 +199,28 @@
         }
 
         /* MAIN */
-
         .main {
+            /* 🔥 FIX GESER KANAN SESUAI LEBAR SIDEBAR */
+            margin-left: 230px;
             flex: 1;
             padding: 30px;
+            min-height: 100vh;
+            background: #dcdcdc;
         }
 
         /* TITLE */
-
         .title {
             font-size: 22px;
             margin-bottom: 25px;
         }
 
         /* CARD */
-
         .card {
             background: #efefef;
             padding: 20px;
         }
 
         /* TABLE */
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -236,6 +235,51 @@
 
         th {
             background: #ddd;
+        }
+
+        /* STAT */
+        .stats {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            flex: 1;
+            padding: 20px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 16px;
+        }
+
+        .stat-card h2 {
+            font-size: 28px;
+        }
+
+        .blue {
+            background: #7da3d7;
+        }
+
+        .green {
+            background: #8be0a2;
+        }
+
+        .red {
+            background: #ef7777;
+        }
+
+        /* STATUS */
+        .status-active {
+            background: #00ff00;
+            padding: 3px 10px;
+        }
+
+        .status-non {
+            background: red;
+            color: white;
+            padding: 3px 10px;
         }
     </style>
 
@@ -280,7 +324,7 @@
 
                 <div>
                     <div>Admin</div>
-                    <small>Dahlan</small>
+                    <small>{{ Auth::user()->nama ?? 'Admin' }}</small>
                 </div>
 
             </div>

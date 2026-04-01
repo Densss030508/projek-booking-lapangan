@@ -7,6 +7,12 @@
     <style>
         .title {
             font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .tanggal-hari-ini {
+            font-size: 15px;
+            color: #555;
             margin-bottom: 20px;
         }
 
@@ -83,19 +89,43 @@
             color: white;
             text-decoration: none;
         }
+
+        /* 🔥 Filter tanggal */
+        .filter-tanggal {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .filter-tanggal input[type="date"] {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #aaa;
+            font-size: 14px;
+        }
     </style>
 
     <div class="title">Dashboard Kasir</div>
+    <div class="tanggal-hari-ini" id="labelTanggal">
+        📅 {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
+    </div>
+
+    {{-- 🔥 Filter Tanggal --}}
+    <div class="filter-tanggal">
+        <label><strong>Filter Tanggal:</strong></label>
+        <input type="date" id="filterTanggal" value="{{ date('Y-m-d') }}">
+    </div>
 
     <!-- CARDS -->
     <div class="cards">
         <div class="card blue">
-            <h2>{{ $jumlahBooking }}</h2>
+            <h2 id="cardBooking">{{ $jumlahBooking }}</h2>
             <p>Booking Hari Ini</p>
         </div>
 
         <div class="card green">
-            <h2>Rp {{ number_format($totalTransaksi, 0, ',', '.') }}</h2>
+            <h2 id="cardTransaksi">Rp {{ number_format($totalTransaksi, 0, ',', '.') }}</h2>
             <p>Total Transaksi</p>
         </div>
 
@@ -108,7 +138,7 @@
     <!-- TABLE -->
     <div class="table-box">
 
-        <h3>Jadwal Lapangan Hari Ini</h3>
+        <h3>Jadwal Lapangan — <span id="labelJadwal">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span></h3>
         <a href="{{ route('kasir.jadwal') }}" class="btn-lihat">Lihat Jadwal Lengkap</a>
 
         <br><br>
@@ -146,7 +176,7 @@
             }
         @endphp
 
-        <table>
+        <table id="tabelJadwal">
             <tr>
                 <th>Jam</th>
 
@@ -174,5 +204,61 @@
         </table>
 
     </div>
+
+    <script>
+        const lapangans = @json($lapangans->pluck('nama'));
+
+        // Format tanggal jadi: Senin, 01 April 2026
+        function formatTanggalIndo(dateStr) {
+            const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            const d = new Date(dateStr + 'T00:00:00');
+            return hari[d.getDay()] + ', ' + String(d.getDate()).padStart(2, '0') +
+                ' ' + bulan[d.getMonth()] + ' ' + d.getFullYear();
+        }
+
+        document.getElementById('filterTanggal').addEventListener('change', function() {
+            const tanggal = this.value;
+
+            // Update label tanggal atas
+            document.getElementById('labelTanggal').innerHTML = '📅 ' + formatTanggalIndo(tanggal);
+
+            // Update label judul jadwal
+            const d = new Date(tanggal + 'T00:00:00');
+            const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+            ];
+            document.getElementById('labelJadwal').innerText =
+                String(d.getDate()).padStart(2, '0') + ' ' + bulan[d.getMonth()] + ' ' + d.getFullYear();
+
+            // AJAX ke controller
+            fetch('{{ route('kasir.dashboardFilter') }}?tanggal=' + tanggal)
+                .then(res => res.json())
+                .then(data => {
+                    // Update card booking & transaksi
+                    document.getElementById('cardBooking').innerText = data.jumlahBooking;
+                    document.getElementById('cardTransaksi').innerText = data.totalTransaksi;
+
+                    // Update tabel jadwal
+                    let html = '<tr><th>Jam</th>';
+                    lapangans.forEach(n => html += '<th>' + n + '</th>');
+                    html += '</tr>';
+
+                    data.jadwal.forEach(row => {
+                        html += '<tr><td>' + row.jam + '</td>';
+                        row.lapangans.forEach(lap => {
+                            html += '<td>' + (lap.booked ?
+                                '<span class="booking">Booking</span>' :
+                                '<span class="kosong">Kosong</span>') + '</td>';
+                        });
+                        html += '</tr>';
+                    });
+
+                    document.getElementById('tabelJadwal').innerHTML = html;
+                });
+        });
+    </script>
 
 @endsection

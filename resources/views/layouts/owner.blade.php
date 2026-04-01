@@ -70,7 +70,6 @@
 
         body {
             background: #dcdcdc;
-            display: flex;
         }
 
         /* SIDEBAR */
@@ -83,6 +82,12 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+
+            /* 🔥 FIX SIDEBAR DIAM */
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
         }
 
         .logo {
@@ -142,8 +147,12 @@
 
         /* MAIN */
         .main {
+            /* 🔥 FIX GESER KANAN SESUAI LEBAR SIDEBAR */
+            margin-left: 230px;
             flex: 1;
             padding: 30px;
+            min-height: 100vh;
+            background: #dcdcdc;
         }
 
         /* TITLE */

@@ -29,8 +29,11 @@
             background: linear-gradient(#4e73df, #224abe);
             color: white;
 
-            /* 🔥 FIX PENTING */
-            position: relative;
+            /* 🔥 FIX SIDEBAR DIAM */
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
             z-index: 100;
             flex-shrink: 0;
 
@@ -89,11 +92,12 @@
 
         /* CONTENT */
         .content {
+            /* 🔥 FIX GESER KANAN SESUAI LEBAR SIDEBAR */
+            margin-left: 230px;
             flex: 1;
             background: #e5e5e5;
             padding: 20px;
-
-            /* 🔥 FIX AGAR TIDAK NUTUP SIDEBAR */
+            min-height: 100vh;
             position: relative;
             z-index: 1;
         }

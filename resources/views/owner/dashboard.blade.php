@@ -11,7 +11,7 @@
         <div class="card blue">
             <i>📄</i>
             <div>
-                <h2>8</h2>
+                <h2>{{ $totalTransaksiHariIni }}</h2>
                 <p>Total Transaksi Hari Ini</p>
             </div>
         </div>
@@ -19,7 +19,7 @@
         <div class="card green">
             <i>💰</i>
             <div>
-                <h2>Rp. 300.000</h2>
+                <h2>Rp {{ number_format($pendapatanHariIni ?? 0, 0, ',', '.') }}</h2>
                 <p>Total Pendapatan Hari Ini</p>
             </div>
         </div>
@@ -27,7 +27,7 @@
         <div class="card orange">
             <i>📊</i>
             <div>
-                <h2>Rp. 10.000.000</h2>
+                <h2>Rp {{ number_format($pendapatanBulanIni ?? 0, 0, ',', '.') }}</h2>
                 <p>Total Pendapatan Bulan Ini</p>
             </div>
         </div>
@@ -35,7 +35,7 @@
         <div class="card red">
             <i>🏟️</i>
             <div>
-                <h2>4</h2>
+                <h2>{{ $totalLapangan }}</h2>
                 <p>Total Lapangan Aktif</p>
             </div>
         </div>
@@ -46,8 +46,43 @@
         <h4>Statistik Booking Mingguan</h4>
 
         <div class="chart">
-            Grafik disini (nanti pakai Chart.js)
+            <canvas id="chartMingguan"></canvas>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const labels = @json(collect($mingguan)->pluck('label'));
+        const data = @json(collect($mingguan)->pluck('jumlah'));
+
+        new Chart(document.getElementById('chartMingguan'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Jumlah Booking',
+                    data: data,
+                    backgroundColor: '#7ea6d8',
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 
 @endsection

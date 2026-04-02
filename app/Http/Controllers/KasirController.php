@@ -14,11 +14,11 @@ class KasirController extends Controller
     {
         $today = date('Y-m-d');
 
-        $jumlahBooking  = Transaksi::whereDate('tanggal', $today)->count();
-        $totalTransaksi = Transaksi::whereDate('tanggal', $today)->sum('total');
-        $jumlahLapangan = Lapangan::count();
+        $jumlahBooking    = Transaksi::whereDate('tanggal', $today)->count();
+        $totalTransaksi   = Transaksi::whereDate('tanggal', $today)->sum('total');
+        $jumlahLapangan   = Lapangan::count();
         $transaksiHariIni = Transaksi::whereDate('tanggal', $today)->get();
-        $lapangans = Lapangan::all();
+        $lapangans        = Lapangan::all();
 
         return view('kasir.dashboard', compact(
             'jumlahBooking',
@@ -33,10 +33,10 @@ class KasirController extends Controller
     {
         $tanggal = $request->tanggal;
 
-        $jumlahBooking  = Transaksi::whereDate('tanggal', $tanggal)->count();
-        $totalTransaksi = Transaksi::whereDate('tanggal', $tanggal)->sum('total');
+        $jumlahBooking    = Transaksi::whereDate('tanggal', $tanggal)->count();
+        $totalTransaksi   = Transaksi::whereDate('tanggal', $tanggal)->sum('total');
         $transaksiHariIni = Transaksi::whereDate('tanggal', $tanggal)->get();
-        $lapangans = Lapangan::all();
+        $lapangans        = Lapangan::all();
 
         $jadwal = [];
         for ($i = 8; $i <= 12; $i++) {
@@ -77,9 +77,13 @@ class KasirController extends Controller
 
     public function booking()
     {
-        // 🔥 Hanya tampilkan lapangan yang TIDAK nonaktif
         $lapangans = Lapangan::where('status', '!=', 'nonaktif')->get();
-        $transaksi = Transaksi::all();
+
+        // ✅ FIX: format tanggal jadi Y-m-d agar cocok dengan filter JavaScript
+        $transaksi = Transaksi::all()->map(function ($trx) {
+            $trx->tanggal = \Carbon\Carbon::parse($trx->tanggal)->format('Y-m-d');
+            return $trx;
+        });
 
         return view('kasir.booking', compact('lapangans', 'transaksi'));
     }
@@ -93,14 +97,14 @@ class KasirController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama'     => 'required',
-            'no_hp'    => 'required',
-            'lapangan' => 'required',
-            'jam'      => 'required',
+            'nama'     => 'required|string|max:100',
+            'no_hp'    => 'required|string|max:50',
+            'lapangan' => 'required|string',
+            'jam'      => 'required|string',
             'durasi'   => 'required',
             'harga'    => 'required',
             'bayar'    => 'required',
-            'tanggal'  => 'required',
+            'tanggal'  => 'required|date',
         ]);
 
         // 🔥 Cek lapangan tidak nonaktif sebelum simpan

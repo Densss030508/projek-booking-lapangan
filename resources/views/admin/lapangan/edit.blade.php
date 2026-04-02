@@ -40,6 +40,16 @@
             background: #dcdcdc;
         }
 
+        {{-- ✅ Style untuk field yang tidak bisa diedit --}} .form-disabled {
+            width: 100%;
+            padding: 8px;
+            background: #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #555;
+            box-sizing: border-box;
+        }
+
         .btn-simpan {
             background: #4f73c7;
             color: white;
@@ -107,14 +117,18 @@
                             <input type="text" name="nama" value="{{ $lapangan->nama }}">
                         </div>
 
+                        {{-- ✅ Status tidak bisa diedit, hanya tampil statusnya --}}
                         <div class="form-group">
                             <label>Status</label>
-                            <select name="status">
-                                <option value="tersedia" {{ $lapangan->status == 'tersedia' ? 'selected' : '' }}>Tersedia
-                                </option>
-                                <option value="tidak tersedia"
-                                    {{ $lapangan->status == 'tidak tersedia' ? 'selected' : '' }}>Tidak Tersedia</option>
-                            </select>
+                            <div class="form-disabled">
+                                @if ($lapangan->status == 'tersedia')
+                                    ✅ Tersedia
+                                @elseif ($lapangan->status == 'tidak tersedia')
+                                    ⏳ Tidak Tersedia
+                                @else
+                                    ❌ Nonaktif
+                                @endif
+                            </div>
                         </div>
 
                         <div class="form-group">

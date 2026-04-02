@@ -127,12 +127,17 @@
                                 <a href="{{ route('lapangan.edit', $item->id) }}" class="btn-edit">Edit</a>
                             @endif
 
-                            {{-- Tombol Aktifkan / Nonaktifkan --}}
-                            <form action="{{ route('lapangan.toggleActive', $item->id) }}" method="POST">
+                            {{-- Tombol Aktifkan / Nonaktifkan dengan SweetAlert --}}
+                            <form id="form-toggle-{{ $item->id }}"
+                                action="{{ route('lapangan.toggleActive', $item->id) }}" method="POST">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit"
-                                    onclick="return confirm('{{ $item->status === 'nonaktif' ? 'Aktifkan kembali' : 'Nonaktifkan' }} lapangan {{ $item->nama }}?')"
+                                <button type="button"
+                                    onclick="konfirmasiToggle(
+                                        '{{ $item->id }}',
+                                        '{{ $item->status === 'nonaktif' ? 'Aktifkan' : 'Nonaktifkan' }}',
+                                        '{{ $item->nama }}'
+                                    )"
                                     style="
                                         padding: 6px 12px;
                                         border: none;
@@ -157,6 +162,25 @@
 
     <!-- SWEETALERT -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function konfirmasiToggle(id, aksi, nama) {
+            Swal.fire({
+                title: 'Apakah Anda Yakin?',
+                text: aksi + ' lapangan ' + nama + '?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: aksi === 'Nonaktifkan' ? '#e74c3c' : '#2ecc71',
+                cancelButtonColor: '#aaa',
+                confirmButtonText: 'Ya, ' + aksi + '!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('form-toggle-' + id).submit();
+                }
+            });
+        }
+    </script>
 
     @if (session('success'))
         <script>

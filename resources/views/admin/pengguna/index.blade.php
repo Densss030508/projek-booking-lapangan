@@ -55,12 +55,17 @@
 
                             {{-- Tombol Aktifkan / Nonaktifkan (tidak tampil untuk diri sendiri) --}}
                             @if (Auth::id() != $user->id)
-                                <form action="{{ route('pengguna.toggleStatus', $user->id) }}" method="POST"
+                                <form id="form-toggle-{{ $user->id }}"
+                                    action="{{ route('pengguna.toggleStatus', $user->id) }}" method="POST"
                                     style="display:inline;">
                                     @csrf
                                     @method('PATCH')
-                                    <button type="submit"
-                                        onclick="return confirm('{{ $user->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }} user {{ $user->nama }}?')"
+                                    <button type="button"
+                                        onclick="konfirmasiToggle(
+                                            '{{ $user->id }}',
+                                            '{{ $user->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}',
+                                            '{{ $user->nama }}'
+                                        )"
                                         style="
                                             padding: 5px 10px;
                                             border: none;
@@ -80,5 +85,39 @@
             </tbody>
         </table>
     </div>
+
+    <!-- SWEETALERT -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function konfirmasiToggle(id, aksi, nama) {
+            Swal.fire({
+                title: 'Apakah Anda Yakin?',
+                text: aksi + ' user ' + nama + '?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: aksi === 'Nonaktifkan' ? '#e74c3c' : '#2ecc71',
+                cancelButtonColor: '#aaa',
+                confirmButtonText: 'Ya, ' + aksi + '!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('form-toggle-' + id).submit();
+                }
+            });
+        }
+    </script>
+
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        </script>
+    @endif
 
 @endsection

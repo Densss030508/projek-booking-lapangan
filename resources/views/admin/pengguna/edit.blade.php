@@ -41,6 +41,7 @@
             border-radius: 4px;
             text-align: center;
             font-size: 13px;
+            color: #555;
         }
 
         .success-box {
@@ -109,12 +110,16 @@
                     <input type="email" name="email" value="{{ $user->email ?? '' }}">
                 </div>
 
+                {{-- ✅ Status tidak bisa diedit, hanya tampil statusnya --}}
                 <div class="form-group">
                     <label>Status</label>
-                    <select name="status">
-                        <option value="aktif" {{ $user->status == 'aktif' ? 'selected' : '' }}>Aktif</option>
-                        <option value="nonaktif" {{ $user->status == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
-                    </select>
+                    <div class="form-disabled">
+                        @if ($user->status == 'aktif')
+                            ✅ Aktif
+                        @else
+                            ❌ Nonaktif
+                        @endif
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -131,7 +136,7 @@
 
             @if (session('success'))
                 <div class="success-box">
-                    ✔ Lapangan Telah Berhasil Di Perbarui
+                    ✔ Pengguna Telah Berhasil Di Perbarui
                 </div>
             @endif
 
@@ -142,7 +147,7 @@
 
         </form>
 
-        <!-- FORM DELETE (TAMBAHAN) -->
+        <!-- FORM DELETE -->
         <form id="deleteForm" action="{{ route('pengguna.destroy', $user->id) }}" method="POST">
             @csrf
             @method('DELETE')

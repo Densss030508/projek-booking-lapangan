@@ -16,24 +16,20 @@ class OwnerController extends Controller
 {
     public function dashboard()
     {
-        // ✅ Gunakan Carbon (lebih akurat dari date())
         $today = Carbon::today();
         $now   = Carbon::now();
 
-        // ✅ TOTAL TRANSAKSI HARI INI
         $totalTransaksiHariIni = Transaksi::whereDate('tanggal', $today)->count();
 
-        // ✅ PENDAPATAN HARI INI
         $pendapatanHariIni = Transaksi::whereDate('tanggal', $today)->sum('total');
 
-        // ✅ PENDAPATAN BULAN INI (FIX)
-        $pendapatanBulanIni = Transaksi::whereMonth('tanggal', $now->month)
+        // ✅ FIX: cast ke integer supaya tidak terpotong
+        $pendapatanBulanIni = (int) Transaksi::whereMonth('tanggal', $now->month)
             ->whereYear('tanggal', $now->year)
             ->sum('total');
 
         $totalLapangan = Lapangan::count();
 
-        // ✅ STATISTIK MINGGUAN (PAKAI CARBON)
         $mingguan = [];
         for ($i = 6; $i >= 0; $i--) {
             $tgl   = Carbon::today()->subDays($i);
@@ -53,7 +49,6 @@ class OwnerController extends Controller
             'mingguan'
         ));
     }
-
     public function produk(Request $request)
     {
         $query = Lapangan::query();

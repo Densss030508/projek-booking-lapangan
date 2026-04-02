@@ -113,7 +113,7 @@
             margin-top: 10px;
         }
 
-        {{-- 🔥 Style notifikasi error --}} .alert-error {
+        .alert-error {
             background: #e74c3c;
             color: white;
             padding: 10px 15px;
@@ -129,7 +129,6 @@
         </div>
     @endif
 
-    {{-- 🔥 Notifikasi error lapangan nonaktif --}}
     @if (session('error'))
         <div class="alert-error">
             ⚠️ {{ session('error') }}
@@ -154,7 +153,6 @@
         <div class="left">
             <h4>1. Pilih Lapangan</h4>
 
-            {{-- 🔥 Cek jika tidak ada lapangan aktif --}}
             @if ($lapangans->isEmpty())
                 <div style="background:#f39c12; color:white; padding:15px; border-radius:8px; text-align:center;">
                     ⚠️ Tidak ada lapangan yang tersedia saat ini.
@@ -167,7 +165,6 @@
                             <img src="{{ asset('storage/' . $lap->foto) }}">
                             <p>{{ $lap->nama }}</p>
                             <small>Rp {{ number_format($lap->harga, 0, ',', '.') }}/Jam</small>
-                            {{-- 🔥 Badge status --}}
                             @if ($lap->status === 'tersedia')
                                 <span style="font-size:11px; color:#2ecc71;">✅ Tersedia</span>
                             @else
@@ -204,7 +201,9 @@
                 <input type="date" name="tanggal" id="tanggal" value="{{ date('Y-m-d') }}" required>
 
                 <input type="text" name="nama" placeholder="Nama" required>
-                <input type="text" name="no_hp" placeholder="No HP" required>
+
+                <input type="text" name="no_hp" id="no_hp" placeholder="No HP" inputmode="numeric"
+                    oninput="this.value = this.value.replace(/\D/g, '')" required>
 
                 <input type="text" id="harga_display" readonly placeholder="Harga per jam">
                 <input type="text" name="durasi" id="durasi" readonly placeholder="Durasi (auto)">
@@ -228,13 +227,19 @@
         let tanggalInput = document.getElementById('tanggal');
 
         filterTanggal();
-
         tanggalInput.addEventListener('change', filterTanggal);
 
-        function filterTanggal() {
-            let tgl = tanggalInput.value;
+        // ✅ FIX UTAMA: ambil 10 karakter pertama saja (Y-m-d)
+        // supaya tidak peduli formatnya "2025-04-02" atau "2025-04-02T00:00:00.000000Z"
+        function getTanggal(tgl) {
+            return String(tgl).substring(0, 10);
+        }
 
-            transaksi = semuaTransaksi.filter(trx => trx.tanggal === tgl);
+        function filterTanggal() {
+            let tgl = tanggalInput.value; // format Y-m-d dari input date
+
+            // ✅ bandingkan hanya 10 karakter pertama dari tanggal transaksi
+            transaksi = semuaTransaksi.filter(trx => getTanggal(trx.tanggal) === tgl);
 
             selectedJam = [];
             document.getElementById('jam').value = '';
@@ -271,8 +276,8 @@
         function renderJam(namaLapangan) {
             document.querySelectorAll('.jam').forEach(div => {
 
-                let jam = div.dataset.jam;
-                let jamInt = parseInt(jam);
+                let jam = div.dataset.jam; // "08:00"
+                let jamInt = parseInt(jam); // 8
 
                 div.classList.remove('booked', 'selected');
                 div.classList.add('tersedia');
@@ -280,23 +285,34 @@
                 transaksi.forEach(trx => {
                     if (trx.lapangan === namaLapangan) {
 
-                        if (trx.jam.includes('-')) {
-                            let range = trx.jam.split('-');
-                            let start = parseInt(range[0]);
-                            let end = parseInt(range[1]);
+                        let jamTrx = trx.jam.trim();
 
-                            if (jamInt >= start && jamInt <= end) {
+                        if (jamTrx.includes(' - ')) {
+                            // ✅ format range: "08:00 - 10:00"
+                            let range = jamTrx.split(' - ');
+                            let start = parseInt(range[0].trim()); // 8
+                            let end = parseInt(range[1].trim()); // 10
+
+                            if (jamInt >= start && jamInt < end) {
                                 div.classList.remove('tersedia');
                                 div.classList.add('booked');
                             }
-                        } else {
-                            let arr = trx.jam.split(',');
-                            arr.forEach(j => {
-                                if (jamInt === parseInt(j)) {
+
+                        } else if (jamTrx.includes(',')) {
+                            // ✅ format multi: "08:00,09:00"
+                            jamTrx.split(',').forEach(j => {
+                                if (jamInt === parseInt(j.trim())) {
                                     div.classList.remove('tersedia');
                                     div.classList.add('booked');
                                 }
                             });
+
+                        } else {
+                            // ✅ format tunggal: "08:00"
+                            if (jamInt === parseInt(jamTrx)) {
+                                div.classList.remove('tersedia');
+                                div.classList.add('booked');
+                            }
                         }
                     }
                 });
@@ -341,14 +357,11 @@
 
         function hitungKembalian(input) {
             let angkaMurni = input.value.replace(/\D/g, '');
-
             input.value = formatRibuan(angkaMurni);
-
             document.getElementById('bayar_value').value = angkaMurni;
 
             let bayar = parseInt(angkaMurni) || 0;
             let total = parseInt(document.getElementById('total_value').value) || 0;
-
             let kembalian = bayar - total;
 
             if (kembalian >= 0) {

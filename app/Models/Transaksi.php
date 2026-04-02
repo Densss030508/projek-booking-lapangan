@@ -21,4 +21,13 @@ class Transaksi extends Model
         'bayar',
         'kembalian'
     ];
+
+    protected $casts = [
+        'tanggal' => 'date',
+        'durasi' => 'integer',
+        'harga' => 'integer',
+        'total' => 'integer',
+        'bayar' => 'integer',
+        'kembalian' => 'integer',
+    ];
 }

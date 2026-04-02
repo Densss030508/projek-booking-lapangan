@@ -58,7 +58,7 @@
         <h2>Laporan Transaksi</h2>
     </div>
 
-    {{-- 🔥 FILTER --}}
+    {{-- FILTER --}}
     <form method="GET">
         <div class="filter-box">
 
@@ -84,37 +84,48 @@
         </div>
     </form>
 
-    {{-- 🔥 LOGIC FILTER --}}
+    {{-- ✅ LOGIC FILTER (FIX: pakai Carbon::parse agar format tanggal cocok) --}}
     @php
+        use Carbon\Carbon;
+
         $data = $transaksi;
 
         // 🔍 SEARCH
         if (request('search')) {
-            $data = $data->filter(function ($item) {
-                return str_contains(strtolower($item->nama), strtolower(request('search'))) ||
-                    str_contains(strtolower($item->kode_transaksi), strtolower(request('search')));
+            $keyword = strtolower(request('search'));
+            $data = $data->filter(function ($item) use ($keyword) {
+                return str_contains(strtolower($item->nama), $keyword) ||
+                    str_contains(strtolower($item->kode_transaksi), $keyword);
             });
         }
 
         // 📅 TANGGAL SPESIFIK
         if (request('tanggal')) {
-            $data = $data->where('tanggal', request('tanggal'));
-        }
-
-        // 📅 FILTER
-        if (request('filter') == 'hari') {
-            $data = $data->where('tanggal', date('Y-m-d'));
-        }
-
-        if (request('filter') == 'bulan') {
-            $data = $data->filter(function ($item) {
-                return date('Y-m', strtotime($item->tanggal)) == date('Y-m');
+            $tglCari = request('tanggal'); // format Y-m-d
+            $data = $data->filter(function ($item) use ($tglCari) {
+                return Carbon::parse($item->tanggal)->format('Y-m-d') === $tglCari;
             });
         }
 
+        // 📅 FILTER HARI INI
+        if (request('filter') == 'hari') {
+            $data = $data->filter(function ($item) {
+                return Carbon::parse($item->tanggal)->isToday();
+            });
+        }
+
+        // 📅 FILTER BULAN INI
+        if (request('filter') == 'bulan') {
+            $data = $data->filter(function ($item) {
+                return Carbon::parse($item->tanggal)->month == Carbon::now()->month &&
+                    Carbon::parse($item->tanggal)->year == Carbon::now()->year;
+            });
+        }
+
+        // 📅 FILTER TAHUN INI
         if (request('filter') == 'tahun') {
             $data = $data->filter(function ($item) {
-                return date('Y', strtotime($item->tanggal)) == date('Y');
+                return Carbon::parse($item->tanggal)->year == Carbon::now()->year;
             });
         }
     @endphp
@@ -137,7 +148,7 @@
             @forelse ($data as $item)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ date('d M Y', strtotime($item->tanggal)) }}</td>
+                    <td>{{ Carbon::parse($item->tanggal)->format('d M Y') }}</td>
                     <td>{{ $item->lapangan }}</td>
                     <td>{{ $item->jam }}</td>
                     <td>{{ $item->durasi }} Jam</td>
@@ -147,7 +158,9 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8">Belum ada transaksi</td>
+                    <td colspan="8" style="text-align:center; color:#999; padding:20px;">
+                        Belum ada transaksi
+                    </td>
                 </tr>
             @endforelse
 

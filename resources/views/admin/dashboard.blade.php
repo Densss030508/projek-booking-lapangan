@@ -205,8 +205,8 @@
             <div class="profile-box">
                 <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png">
                 <div>
-                    <div>Admin</div>
-                    <small>Dahlan</small>
+                    <div>{{ ucfirst(auth()->user()->role ?? 'Admin') }}</div>
+                    <small>{{ auth()->user()->nama ?? 'User' }}</small>
                 </div>
             </div>
 

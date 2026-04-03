@@ -4,9 +4,22 @@
 
 @section('content')
 
-    <div class="header">
-        <h2>Kelola Pengguna Admin</h2>
-        <a href="{{ route('pengguna.create') }}" class="btn-tambah">+ Tambah Pengguna</a>
+    <div class="header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="margin:0;">Kelola Pengguna Admin</h2>
+
+        <a href="{{ route('pengguna.create') }}"
+            style="
+                background:#4f73c7;
+                color:white;
+                padding:10px 18px;
+                border-radius:6px;
+                text-decoration:none;
+                font-size:14px;
+                font-weight:500;
+                box-shadow:0 2px 6px rgba(0,0,0,0.1);
+            ">
+            + Tambah Pengguna
+        </a>
     </div>
 
     {{-- Notifikasi sukses/error --}}
@@ -15,6 +28,7 @@
             ✅ {{ session('success') }}
         </div>
     @endif
+
     @if (session('error'))
         <div style="background:#e74c3c; color:white; padding:10px 15px; border-radius:6px; margin-bottom:15px;">
             ⚠️ {{ session('error') }}
@@ -46,14 +60,14 @@
                                 <span class="status-non">Di NonAktifkan</span>
                             @endif
                         </td>
-                        <td style="display:flex; gap:8px; align-items:center;">
+                        <td style="display:flex; gap:8px; align-items:center; justify-content:center;">
 
-                            {{-- Tombol Edit (hanya jika aktif) --}}
+                            {{-- Tombol Edit --}}
                             @if ($user->status === 'aktif')
                                 <a href="{{ route('pengguna.edit', $user->id) }}" class="btn-edit">Edit</a>
                             @endif
 
-                            {{-- Tombol Aktifkan / Nonaktifkan (tidak tampil untuk diri sendiri) --}}
+                            {{-- Tombol Aktifkan / Nonaktifkan --}}
                             @if (Auth::id() != $user->id)
                                 <form id="form-toggle-{{ $user->id }}"
                                     action="{{ route('pengguna.toggleStatus', $user->id) }}" method="POST"
@@ -67,11 +81,12 @@
                                             '{{ $user->nama }}'
                                         )"
                                         style="
-                                            padding: 5px 10px;
+                                            padding: 6px 12px;
                                             border: none;
-                                            border-radius: 5px;
+                                            border-radius: 6px;
                                             cursor: pointer;
                                             color: white;
+                                            font-size:13px;
                                             background: {{ $user->status === 'aktif' ? '#e74c3c' : '#2ecc71' }};
                                         ">
                                         {{ $user->status === 'aktif' ? '⛔ Nonaktifkan' : '✅ Aktifkan' }}
@@ -86,7 +101,6 @@
         </table>
     </div>
 
-    <!-- SWEETALERT -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
@@ -107,17 +121,5 @@
             });
         }
     </script>
-
-    @if (session('success'))
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: '{{ session('success') }}',
-                timer: 2000,
-                showConfirmButton: false
-            });
-        </script>
-    @endif
 
 @endsection

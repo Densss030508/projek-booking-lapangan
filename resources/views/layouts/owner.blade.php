@@ -248,6 +248,21 @@
                     Dashboard
                 </a>
 
+                <script>
+                    function logSidebar(activity) {
+                        fetch("{{ route('log.sidebar') }}", {
+                            method: "POST",
+                            headers: {
+                                "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                activity: activity
+                            })
+                        });
+                    }
+                </script>
+
                 <a href="{{ route('owner.produk') }}" class="{{ request()->routeIs('owner.produk') ? 'active' : '' }}">
                     Data Produk
                 </a>
@@ -270,10 +285,8 @@
             <div class="profile-box">
                 <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png">
 
-                <div>
-                    <div>Owner</div>
-                    <small>{{ Auth::user()->nama ?? 'User' }}</small>
-                </div>
+                <p>{{ ucfirst(auth()->user()->role ?? 'Owner') }}</p>
+                <small>{{ auth()->user()->nama ?? 'User' }}</small>
             </div>
 
             <form method="POST" action="{{ route('logout') }}">

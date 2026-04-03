@@ -35,51 +35,48 @@
             border-radius: 4px;
         }
 
-        .success-box {
-            margin-top: 20px;
-            background: #c8f7c5;
-            color: green;
-            padding: 10px;
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-back,
+        .btn-save {
+            padding: 10px 18px;
+            border: none;
             border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .btn-back {
+            background: #6c757d;
+        }
+
+        .btn-save {
+            background: #4f73c7;
         }
 
         .error-box {
-            margin-top: 10px;
+            margin-bottom: 15px;
             background: #ffd2d2;
             color: red;
             padding: 10px;
             border-radius: 6px;
         }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-back {
-            background: #5b7bd5;
-            color: white;
-        }
-
-        .btn-save {
-            background: #5b7bd5;
-            color: white;
-            float: right;
-            margin-top: 20px;
-        }
     </style>
 
-    <div class="header">
-        <h2>Kelola Pengguna</h2>
-        <a href="{{ route('pengguna.index') }}" class="btn btn-back">← Kembali</a>
+    <div class="btn-group">
+        <h2>Tambah Pengguna</h2>
+        <a href="{{ route('pengguna.index') }}" class="btn-back">← Kembali</a>
     </div>
 
     <div class="container-form">
-
-        <h3>Tambah Pengguna</h3>
-
-        <!-- 🔥 FIX PALING PENTING -->
         <form action="/admin/pengguna/store" method="POST">
             @csrf
 
@@ -90,7 +87,6 @@
             @endif
 
             <div class="form-grid">
-
                 <div class="form-group">
                     <label>Nama Pengguna</label>
                     <input type="text" name="nama" value="{{ old('nama') }}">
@@ -127,20 +123,12 @@
                     <label>Konfirmasi Password</label>
                     <input type="password" name="password_confirmation">
                 </div>
-
             </div>
 
-            <!-- ✅ NOTIF -->
-            @if (session('success'))
-                <div class="success-box">
-                    ✔ Pengguna Berhasil Ditambahkan
-                </div>
-            @endif
-
-            <button type="submit" class="btn btn-save">+ Simpan Pengguna</button>
-
+            <div style="display:flex; justify-content:flex-end; margin-top:25px;">
+                <button type="submit" class="btn-save">+ Simpan Pengguna</button>
+            </div>
         </form>
-
     </div>
 
 @endsection

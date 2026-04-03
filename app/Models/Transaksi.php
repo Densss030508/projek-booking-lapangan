@@ -19,6 +19,7 @@ class Transaksi extends Model
         'harga',
         'total',
         'bayar',
+        'kasir',
         'kembalian'
     ];
 

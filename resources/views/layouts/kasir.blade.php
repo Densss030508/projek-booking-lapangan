@@ -142,12 +142,12 @@
             </div>
 
             <div class="bottom">
-                <p>Kasir</p>
-                <small>{{ auth()->user()->name ?? 'User' }}</small>
+                <p>{{ ucfirst(auth()->user()->role ?? 'Kasir') }}</p>
+                <small>{{ auth()->user()->nama ?? 'User' }}</small>
 
-                <form method="POST" action="{{ route('logout') }}">
+                <form action="{{ route('logout') }}" method="POST">
                     @csrf
-                    <button type="submit" class="logout-btn">Log Out</button>
+                    <button class="logout-btn">Log Out</button>
                 </form>
             </div>
 

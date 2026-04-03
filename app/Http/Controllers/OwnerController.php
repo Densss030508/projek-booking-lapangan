@@ -10,7 +10,7 @@ use App\Exports\LaporanExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Dompdf\Dompdf;
 use Dompdf\Options;
-use Carbon\Carbon; // ✅ TAMBAHAN
+use Carbon\Carbon;
 
 class OwnerController extends Controller
 {
@@ -20,15 +20,13 @@ class OwnerController extends Controller
         $now   = Carbon::now();
 
         $totalTransaksiHariIni = Transaksi::whereDate('tanggal', $today)->count();
+        $pendapatanHariIni     = Transaksi::whereDate('tanggal', $today)->sum('total');
 
-        $pendapatanHariIni = Transaksi::whereDate('tanggal', $today)->sum('total');
-
-        // ✅ FIX: cast ke integer supaya tidak terpotong
         $pendapatanBulanIni = (int) Transaksi::whereMonth('tanggal', $now->month)
             ->whereYear('tanggal', $now->year)
             ->sum('total');
 
-        $totalLapangan = Lapangan::count();
+        $totalLapangan = Lapangan::where('status', '!=', 'nonaktif')->count();
 
         $mingguan = [];
         for ($i = 6; $i >= 0; $i--) {
@@ -49,6 +47,7 @@ class OwnerController extends Controller
             'mingguan'
         ));
     }
+
     public function produk(Request $request)
     {
         $query = Lapangan::query();
@@ -58,6 +57,7 @@ class OwnerController extends Controller
         }
 
         $lapangans = $query->get();
+
         return view('owner.produk', compact('lapangans'));
     }
 
@@ -83,9 +83,19 @@ class OwnerController extends Controller
             $query->where('lapangan', $lapangan);
         }
 
-        $transaksi       = $query->orderBy('tanggal')->get();
-        $lapangans       = Lapangan::all();
+        $transaksi = $query->orderBy('tanggal')->get();
+        $lapangans = Lapangan::all();
+
         $totalPendapatan = $transaksi->sum('total');
+        $totalTransaksi  = $transaksi->count();
+        $rataRata        = $totalTransaksi > 0 ? $totalPendapatan / $totalTransaksi : 0;
+
+        $lapanganTerlaris = $transaksi
+            ->groupBy('lapangan')
+            ->map->count()
+            ->sortDesc()
+            ->keys()
+            ->first();
 
         return view('owner.laporan', compact(
             'transaksi',
@@ -93,7 +103,10 @@ class OwnerController extends Controller
             'dari',
             'sampai',
             'lapangan',
-            'totalPendapatan'
+            'totalPendapatan',
+            'totalTransaksi',
+            'rataRata',
+            'lapanganTerlaris'
         ));
     }
 
@@ -150,7 +163,18 @@ class OwnerController extends Controller
 
     public function aktivitas(Request $request)
     {
-        $query = LogAktivitas::with('user')->orderBy('created_at', 'desc');
+        $query = LogAktivitas::with('user')->latest('id');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('activity', 'like', '%' . $search . '%')
+                    ->orWhereHas('user', function ($user) use ($search) {
+                        $user->where('nama', 'like', '%' . $search . '%');
+                    });
+            });
+        }
 
         if ($request->filled('role')) {
             $query->whereHas('user', function ($q) use ($request) {
@@ -164,6 +188,21 @@ class OwnerController extends Controller
 
         $logs = $query->get();
 
-        return view('owner.aktivitas', compact('logs'));
+        $totalLogs = LogAktivitas::count();
+
+        $totalAdmin = LogAktivitas::whereHas('user', fn($q) => $q->where('role', 'admin'))->count();
+        $totalKasir = LogAktivitas::whereHas('user', fn($q) => $q->where('role', 'kasir'))->count();
+        $totalOwner = LogAktivitas::whereHas('user', fn($q) => $q->where('role', 'owner'))->count();
+
+        return response()->view('owner.aktivitas', compact(
+            'logs',
+            'totalLogs',
+            'totalAdmin',
+            'totalKasir',
+            'totalOwner'
+        ))
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 }

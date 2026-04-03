@@ -27,8 +27,7 @@
             font-weight: 500;
         }
 
-        .form-group input,
-        .form-group select {
+        .form-group input {
             padding: 10px;
             background: #ddd;
             border: none;
@@ -44,81 +43,76 @@
             color: #555;
         }
 
-        .success-box {
-            margin-top: 20px;
-            background: #c8f7c5;
-            color: green;
-            padding: 10px;
-            border-radius: 6px;
-            display: inline-block;
+        .btn-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .btn {
-            padding: 10px 20px;
+        .btn-action {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            gap: 10px;
+        }
+
+        .btn-back,
+        .btn-save,
+        .btn-delete {
+            padding: 10px 18px;
             border: none;
+            border-radius: 6px;
+            color: white;
             cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
         }
 
         .btn-back {
-            background: #5b7bd5;
-            color: white;
+            background: #6c757d;
         }
 
         .btn-save {
-            background: #5b7bd5;
-            color: white;
-            float: right;
-            margin-top: 20px;
+            background: #4f73c7;
         }
 
         .btn-delete {
-            background: #ff6b6b;
-            color: white;
-            margin-top: 20px;
+            background: #e74c3c;
         }
     </style>
 
-    <div class="header">
-        <h2>Kelola Pengguna</h2>
-        <a href="{{ route('pengguna.index') }}" class="btn btn-back">← Kembali</a>
+    <div class="btn-top">
+        <h2>Edit Pengguna</h2>
+        <a href="{{ route('pengguna.index') }}" class="btn-back">← Kembali</a>
     </div>
 
     <div class="container-form">
-
-        <h3>Edit Pengguna</h3>
-
         <form id="updateForm" action="{{ route('pengguna.update', $user->id) }}" method="POST">
             @csrf
             @method('PUT')
 
             <div class="form-grid">
-
                 <div class="form-group">
                     <label>Nama Pengguna</label>
-                    <input type="text" name="nama" value="{{ $user->nama ?? '' }}">
+                    <input type="text" name="nama" value="{{ $user->nama }}">
                 </div>
 
                 <div class="form-group">
                     <label>Peran</label>
-                    <div class="form-disabled">
-                        Tidak Bisa Di Ubah Ketika Di Edit
-                    </div>
+                    <div class="form-disabled">Tidak Bisa Di Ubah Ketika Di Edit</div>
                 </div>
 
                 <div class="form-group">
                     <label>Email</label>
-                    <input type="email" name="email" value="{{ $user->email ?? '' }}">
+                    <input type="email" name="email" value="{{ $user->email }}">
                 </div>
 
-                {{-- ✅ Status tidak bisa diedit, hanya tampil statusnya --}}
                 <div class="form-group">
                     <label>Status</label>
                     <div class="form-disabled">
-                        @if ($user->status == 'aktif')
-                            ✅ Aktif
-                        @else
-                            ❌ Nonaktif
-                        @endif
+                        {{ $user->status == 'aktif' ? '✅ Aktif' : '❌ Nonaktif' }}
                     </div>
                 </div>
 
@@ -131,33 +125,26 @@
                     <label>Konfirmasi Password Baru</label>
                     <input type="password" name="password_confirmation">
                 </div>
-
             </div>
 
-            @if (session('success'))
-                <div class="success-box">
-                    ✔ Pengguna Telah Berhasil Di Perbarui
-                </div>
-            @endif
+            <div class="btn-action">
+                <button type="button" onclick="confirmDelete()" class="btn-delete">
+                    Hapus Pengguna
+                </button>
 
-            <div style="display: flex; justify-content: space-between;">
-                <button type="button" onclick="confirmDelete()" class="btn btn-delete">Hapus Pengguna</button>
-                <button type="button" onclick="confirmUpdate()" class="btn btn-save">+ Simpan Pengguna</button>
+                <button type="button" onclick="confirmUpdate()" class="btn-save">
+                    + Simpan Pengguna
+                </button>
             </div>
-
         </form>
 
-        <!-- FORM DELETE -->
         <form id="deleteForm" action="{{ route('pengguna.destroy', $user->id) }}" method="POST">
             @csrf
             @method('DELETE')
         </form>
-
     </div>
 
-    <!-- SWEETALERT -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         function confirmUpdate() {
             Swal.fire({

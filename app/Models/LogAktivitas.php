@@ -8,9 +8,13 @@ class LogAktivitas extends Model
 {
     protected $table = 'log';
 
-    public $timestamps = false;
+    public $timestamps = true;
+    const UPDATED_AT = null;
 
-    protected $fillable = ['id_user', 'activity'];
+    protected $fillable = [
+        'id_user',
+        'activity'
+    ];
 
     public function user()
     {

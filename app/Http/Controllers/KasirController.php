@@ -7,6 +7,7 @@ use App\Models\Transaksi;
 use App\Models\Lapangan;
 use App\Models\LogAktivitas;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class KasirController extends Controller
 {
@@ -14,11 +15,16 @@ class KasirController extends Controller
     {
         $today = date('Y-m-d');
 
-        $jumlahBooking    = Transaksi::whereDate('tanggal', $today)->count();
-        $totalTransaksi   = Transaksi::whereDate('tanggal', $today)->sum('total');
-        $jumlahLapangan   = Lapangan::count();
+        $jumlahBooking = Transaksi::whereDate('tanggal', $today)->count();
+        $totalTransaksi = Transaksi::whereDate('tanggal', $today)->sum('total');
+
+        // ✅ FIX: hanya hitung lapangan aktif
+        $jumlahLapangan = Lapangan::where('status', '!=', 'nonaktif')->count();
+
         $transaksiHariIni = Transaksi::whereDate('tanggal', $today)->get();
-        $lapangans        = Lapangan::all();
+
+        // ✅ FIX: dashboard hanya tampilkan lapangan aktif
+        $lapangans = Lapangan::where('status', '!=', 'nonaktif')->get();
 
         return view('kasir.dashboard', compact(
             'jumlahBooking',
@@ -33,22 +39,27 @@ class KasirController extends Controller
     {
         $tanggal = $request->tanggal;
 
-        $jumlahBooking    = Transaksi::whereDate('tanggal', $tanggal)->count();
-        $totalTransaksi   = Transaksi::whereDate('tanggal', $tanggal)->sum('total');
+        $jumlahBooking = Transaksi::whereDate('tanggal', $tanggal)->count();
+        $totalTransaksi = Transaksi::whereDate('tanggal', $tanggal)->sum('total');
         $transaksiHariIni = Transaksi::whereDate('tanggal', $tanggal)->get();
-        $lapangans        = Lapangan::all();
+
+        // ✅ FIX: filter hanya lapangan aktif
+        $lapangans = Lapangan::where('status', '!=', 'nonaktif')->get();
 
         $jadwal = [];
         for ($i = 8; $i <= 12; $i++) {
             $row = ['jam' => sprintf('%02d.00', $i), 'lapangans' => []];
+
             foreach ($lapangans as $lap) {
                 $booked = false;
+
                 foreach ($transaksiHariIni as $trx) {
                     if ($trx->lapangan == $lap->nama) {
                         if (str_contains($trx->jam, '-')) {
                             $range = explode('-', $trx->jam);
                             $start = (int) date('H', strtotime(trim($range[0])));
-                            $end   = (int) date('H', strtotime(trim($range[1])));
+                            $end = (int) date('H', strtotime(trim($range[1])));
+
                             if ($i >= $start && $i <= $end) {
                                 $booked = true;
                                 break;
@@ -63,15 +74,20 @@ class KasirController extends Controller
                         }
                     }
                 }
-                $row['lapangans'][] = ['nama' => $lap->nama, 'booked' => $booked];
+
+                $row['lapangans'][] = [
+                    'nama' => $lap->nama,
+                    'booked' => $booked
+                ];
             }
+
             $jadwal[] = $row;
         }
 
         return response()->json([
-            'jumlahBooking'  => $jumlahBooking,
+            'jumlahBooking' => $jumlahBooking,
             'totalTransaksi' => 'Rp ' . number_format($totalTransaksi, 0, ',', '.'),
-            'jadwal'         => $jadwal,
+            'jadwal' => $jadwal,
         ]);
     }
 
@@ -79,9 +95,8 @@ class KasirController extends Controller
     {
         $lapangans = Lapangan::where('status', '!=', 'nonaktif')->get();
 
-        // ✅ FIX: format tanggal jadi Y-m-d agar cocok dengan filter JavaScript
         $transaksi = Transaksi::all()->map(function ($trx) {
-            $trx->tanggal = \Carbon\Carbon::parse($trx->tanggal)->format('Y-m-d');
+            $trx->tanggal = Carbon::parse($trx->tanggal)->format('Y-m-d');
             return $trx;
         });
 
@@ -107,7 +122,6 @@ class KasirController extends Controller
             'tanggal'  => 'required|date',
         ]);
 
-        // 🔥 Cek lapangan tidak nonaktif sebelum simpan
         $lapangan = Lapangan::where('nama', $request->lapangan)
             ->where('status', '!=', 'nonaktif')
             ->first();
@@ -118,12 +132,12 @@ class KasirController extends Controller
                 ->with('error', 'Lapangan tidak tersedia atau sedang dinonaktifkan!');
         }
 
-        $harga     = (int) str_replace('.', '', $request->harga);
-        $bayar     = (int) str_replace('.', '', $request->bayar);
-        $durasi    = (int) $request->durasi;
-        $total     = $harga * $durasi;
+        $harga = (int) str_replace('.', '', $request->harga);
+        $bayar = (int) str_replace('.', '', $request->bayar);
+        $durasi = (int) $request->durasi;
+        $total = $harga * $durasi;
         $kembalian = $bayar - $total;
-        $kode      = 'TRX-' . now()->format('Ymd') . '-' . rand(100, 999);
+        $kode = 'TRX-' . now()->format('Ymd') . '-' . rand(100, 999);
 
         $transaksi = Transaksi::create([
             'kode_transaksi' => $kode,
@@ -139,9 +153,9 @@ class KasirController extends Controller
             'kembalian'      => $kembalian,
         ]);
 
-        // 🔥 Catat log transaksi
+        // ✅ LOG AKTIVITAS FIX
         LogAktivitas::create([
-            'id_user'  => Auth::id(),
+            'id_user' => Auth::id(),
             'activity' => 'Membuat transaksi booking ' . $request->lapangan .
                 ' atas nama ' . $request->nama .
                 ' jam ' . $request->jam .

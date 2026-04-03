@@ -4,116 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>@yield('title')</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .btn-tambah {
-            background: #4f73c7;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .status-active {
-            background: #00ff40;
-            padding: 4px 12px;
-        }
-
-        .status-non {
-            background: red;
-            color: white;
-            padding: 4px 12px;
-        }
-
-        .btn-edit {
-            background: #8be0a2;
-            border: none;
-            padding: 5px 14px;
-            cursor: pointer;
-        }
-
-        /* HEADER */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .header h2 {
-            font-size: 20px;
-        }
-
-        .btn-tambah {
-            background: #4f73c7;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-
-        /* GRID LAPANGAN */
-        .lapangan-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 30px;
-        }
-
-        /* CARD */
-        .card {
-            background: #efefef;
-            padding: 15px;
-            border-radius: 3px;
-        }
-
-        .card img {
-            width: 100%;
-            height: 140px;
-            object-fit: cover;
-            margin-bottom: 10px;
-        }
-
-        .card-title {
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-
-        .card-info {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .card-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .price {
-            font-weight: 500;
-        }
-
-        .btn-edit {
-            background: #4be37a;
-            border: none;
-            padding: 6px 18px;
-            cursor: pointer;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -135,12 +30,9 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-
-            /* 🔥 FIX SIDEBAR DIAM */
             position: fixed;
             top: 0;
             left: 0;
-            z-index: 100;
         }
 
         .logo {
@@ -162,12 +54,9 @@
             border-radius: 5px;
         }
 
-        .menu a:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
+        .menu a:hover,
         .menu a.active {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         /* PROFILE */
@@ -185,6 +74,7 @@
 
         .profile-box img {
             width: 40px;
+            height: 40px;
         }
 
         .logout-btn {
@@ -200,97 +90,76 @@
 
         /* MAIN */
         .main {
-            /* 🔥 FIX GESER KANAN SESUAI LEBAR SIDEBAR */
             margin-left: 230px;
-            flex: 1;
             padding: 30px;
             min-height: 100vh;
-            background: #dcdcdc;
         }
 
-        /* TITLE */
-        .title {
-            font-size: 22px;
-            margin-bottom: 25px;
-        }
-
-        /* CARD */
+        /* GLOBAL CARD */
         .card {
             background: #efefef;
             padding: 20px;
+            border-radius: 8px;
         }
 
-        /* TABLE */
+        /* GLOBAL TABLE */
         table {
             width: 100%;
             border-collapse: collapse;
+            background: white;
         }
 
         th,
         td {
-            border: 1px solid #999;
+            border: 1px solid #ddd;
             padding: 10px;
             text-align: center;
         }
 
         th {
-            background: #ddd;
-        }
-
-        /* STAT */
-        .stats {
-            display: flex;
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-
-        .stat-card {
-            flex: 1;
-            padding: 20px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 16px;
-        }
-
-        .stat-card h2 {
-            font-size: 28px;
-        }
-
-        .blue {
-            background: #7da3d7;
-        }
-
-        .green {
-            background: #8be0a2;
-        }
-
-        .red {
-            background: #ef7777;
+            background: #f1f1f1;
         }
 
         /* STATUS */
         .status-active {
-            background: #00ff00;
-            padding: 3px 10px;
+            background: #2ecc71;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
         }
 
         .status-non {
-            background: red;
+            background: #e74c3c;
             color: white;
-            padding: 3px 10px;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        /* BUTTON */
+        .btn-edit {
+            background: #2ecc71;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-tambah {
+            background: #4f73c7;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
         }
     </style>
-
 </head>
 
 <body>
 
     <div class="sidebar">
-
         <div>
-
             <div class="logo">
                 <img src="/images/kixa.png">
             </div>
@@ -313,34 +182,26 @@
                     Laporan
                 </a>
             </div>
-
         </div>
 
         <div class="profile">
-
             <div class="profile-box">
-
                 <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png">
-
                 <div>
-                    <div>Admin</div>
-                    <small>{{ Auth::user()->nama ?? 'Admin' }}</small>
+                    <div>{{ ucfirst(auth()->user()->role ?? 'Admin') }}</div>
+                    <small>{{ auth()->user()->nama ?? 'User' }}</small>
                 </div>
-
             </div>
 
-            <form method="POST" action="{{ route('logout') }}">
+            <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button class="logout-btn">Log Out</button>
+                <button type="submit" class="logout-btn">Logout</button>
             </form>
         </div>
-
     </div>
 
     <div class="main">
-
         @yield('content')
-
     </div>
 
 </body>

@@ -10,7 +10,7 @@
 
         {{-- FILTER --}}
         <form method="GET" action="{{ route('owner.laporan') }}">
-            <div class="filter-box" style="flex-wrap:wrap; gap:10px; margin-bottom:20px;">
+            <div class="filter-box" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
 
                 <input type="date" name="dari" value="{{ $dari ?? '' }}"
                     style="padding:8px; border:1px solid #ccc; border-radius:5px;">
@@ -32,66 +32,79 @@
                 <button type="submit" class="btn btn-blue">🔍 Cari</button>
 
                 @if (!empty($dari) || !empty($sampai) || !empty($lapangan))
-                    <a href="{{ route('owner.laporan') }}" class="btn"
-                        style="background:#ccc; color:#333; border-radius:5px; text-decoration:none; padding:5px 10px;">
+                    <a href="{{ route('owner.laporan') }}"
+                        style="background:#ccc; color:#333; border-radius:5px; text-decoration:none; padding:8px 15px;">
                         ✖ Reset
                     </a>
                 @endif
-
             </div>
         </form>
 
-        {{-- TOMBOL EXPORT --}}
-        @if (isset($transaksi) && $transaksi->count() > 0)
+        {{-- EXPORT --}}
+        @if ($transaksi->count() > 0)
             <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <a href="{{ route('owner.exportExcel', request()->query()) }}" class="btn"
+                <a href="{{ route('owner.exportExcel', request()->query()) }}"
                     style="background:#1d6f42; color:white; border-radius:5px; text-decoration:none; padding:8px 15px;">
                     📥 Download Excel
                 </a>
-                <a href="{{ route('owner.exportPdf', request()->query()) }}" class="btn"
+
+                <a href="{{ route('owner.exportPdf', request()->query()) }}"
                     style="background:#c0392b; color:white; border-radius:5px; text-decoration:none; padding:8px 15px;">
                     📄 Download PDF
                 </a>
             </div>
         @endif
 
-        {{-- TABEL --}}
-        <table>
-            <tr>
-                <th>No</th>
-                <th>Tanggal</th>
-                <th>Lapangan</th>
-                <th>Nama</th>
-                <th>Jam</th>
-                <th>Durasi</th>
-                <th>Total</th>
-            </tr>
+        {{-- TABLE DETAIL --}}
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <tr style="background:#f5f5f5;">
+                    <th>No</th>
+                    <th>Tanggal Booking</th>
+                    <th>Lapangan</th>
+                    <th>Jam Booking</th>
+                    <th>Durasi</th>
+                    <th>Nama Penyewa</th>
+                    <th>No. HP</th>
+                    <th>ID Transaksi</th>
+                    <th>Total Bayar</th>
+                    <th>Status</th>
+                </tr>
 
-            @if (isset($transaksi) && $transaksi->count() > 0)
-                @foreach ($transaksi as $i => $trx)
+                @forelse ($transaksi as $item)
                     <tr>
-                        <td>{{ $i + 1 }}</td>
-                        <td>{{ date('d/m/Y', strtotime($trx->tanggal)) }}</td>
-                        <td>{{ $trx->lapangan }}</td>
-                        <td>{{ $trx->nama }}</td>
-                        <td>{{ $trx->jam }}</td>
-                        <td>{{ $trx->durasi }} Jam</td>
-                        <td>Rp {{ number_format($trx->total, 0, ',', '.') }}</td>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}</td>
+                        <td>{{ $item->lapangan }}</td>
+                        <td>{{ $item->jam }}</td>
+                        <td>{{ $item->durasi }} Jam</td>
+                        <td>{{ $item->nama }}</td>
+                        <td>{{ $item->no_hp }}</td>
+                        <td>{{ $item->kode_transaksi }}</td>
+                        <td>Rp {{ number_format($item->total, 0, ',', '.') }}</td>
+                        <td>
+                            <span
+                                style="background:#4CAF50; color:white; padding:4px 10px; border-radius:4px; font-size:12px;">
+                                Berhasil
+                            </span>
+                        </td>
                     </tr>
-                @endforeach
-                <tr style="font-weight:bold; background:#f0f0f0;">
-                    <td colspan="6" style="text-align:right;">Total Pendapatan</td>
-                    <td>Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</td>
-                </tr>
-            @else
-                <tr>
-                    <td colspan="7" style="text-align:center; color:#999; padding:20px;">
-                        Silakan pilih filter tanggal lalu klik Cari.
-                    </td>
-                </tr>
-            @endif
+                @empty
+                    <tr>
+                        <td colspan="10" style="text-align:center; padding:20px;">
+                            Belum ada transaksi
+                        </td>
+                    </tr>
+                @endforelse
 
-        </table>
+                @if ($transaksi->count() > 0)
+                    <tr style="font-weight:bold; background:#f0f0f0;">
+                        <td colspan="8" style="text-align:right;">Total Pendapatan</td>
+                        <td colspan="2">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</td>
+                    </tr>
+                @endif
+            </table>
+        </div>
 
     </div>
 

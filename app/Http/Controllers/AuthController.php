@@ -44,7 +44,6 @@ class AuthController extends Controller
         Auth::loginUsingId($user->id);
         $request->session()->regenerate();
 
-        // 🔥 Catat log login
         LogAktivitas::create([
             'id_user'  => $user->id,
             'activity' => 'Login sebagai ' . ucfirst($user->role),
@@ -63,7 +62,6 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        // 🔥 Catat log logout sebelum session dihapus
         if (Auth::check()) {
             LogAktivitas::create([
                 'id_user'  => Auth::id(),

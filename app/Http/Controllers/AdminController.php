@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Lapangan;
-use App\Models\Transaksi; // 🔥 WAJIB TAMBAH INI
+use App\Models\Transaksi;
 
 class AdminController extends Controller
 {
@@ -13,7 +13,6 @@ class AdminController extends Controller
     {
         $totalUser = User::count();
 
-        // ✅ FIX: hanya hitung lapangan aktif
         $totalLapangan = Lapangan::where('status', '!=', 'nonaktif')->count();
 
         $nonAktif = User::where('status', 'nonaktif')->count();
@@ -28,10 +27,10 @@ class AdminController extends Controller
         ));
     }
 
-    // 🔥 TAMBAHAN BARU (INI YANG PENTING)
+
     public function laporan()
     {
-        $transaksi = Transaksi::latest()->get(); // ambil dari kasir
+        $transaksi = Transaksi::latest()->get();
 
         return view('admin.laporan.index', compact('transaksi'));
     }

@@ -199,9 +199,7 @@
                 <input type="hidden" name="kembalian" id="kembalian_value">
 
                 <input type="date" name="tanggal" id="tanggal" value="{{ date('Y-m-d') }}" required>
-
                 <input type="text" name="nama" placeholder="Nama" required>
-
                 <input type="text" name="no_hp" id="no_hp" placeholder="No HP" inputmode="numeric"
                     oninput="this.value = this.value.replace(/\D/g, '')" required>
 
@@ -220,25 +218,23 @@
     <script>
         let selectedJam = [];
         let hargaAsli = 0;
-
         let semuaTransaksi = @json($transaksi);
         let transaksi = [];
-
         let tanggalInput = document.getElementById('tanggal');
 
         filterTanggal();
         tanggalInput.addEventListener('change', filterTanggal);
 
-        // ✅ FIX UTAMA: ambil 10 karakter pertama saja (Y-m-d)
-        // supaya tidak peduli formatnya "2025-04-02" atau "2025-04-02T00:00:00.000000Z"
         function getTanggal(tgl) {
             return String(tgl).substring(0, 10);
         }
 
-        function filterTanggal() {
-            let tgl = tanggalInput.value; // format Y-m-d dari input date
+        function getJamAngka(jamString) {
+            return parseInt(jamString.split(':')[0]);
+        }
 
-            // ✅ bandingkan hanya 10 karakter pertama dari tanggal transaksi
+        function filterTanggal() {
+            let tgl = tanggalInput.value;
             transaksi = semuaTransaksi.filter(trx => getTanggal(trx.tanggal) === tgl);
 
             selectedJam = [];
@@ -246,6 +242,10 @@
             document.getElementById('durasi').value = '';
             document.getElementById('total_display').value = '';
             document.getElementById('total_value').value = '';
+
+            document.querySelectorAll('.jam').forEach(j => {
+                j.classList.remove('selected');
+            });
 
             document.querySelectorAll('.card.active').forEach(el => {
                 let nama = el.querySelector('p').innerText;
@@ -265,51 +265,47 @@
             document.getElementById('lapangan').value = nama;
 
             hargaAsli = parseInt(harga);
-
             document.getElementById('harga_display').value = 'Rp ' + formatRibuan(hargaAsli) + '/Jam';
             document.getElementById('harga_value').value = hargaAsli;
 
             selectedJam = [];
+            document.querySelectorAll('.jam').forEach(j => {
+                j.classList.remove('selected');
+            });
+
             renderJam(nama);
         }
 
         function renderJam(namaLapangan) {
             document.querySelectorAll('.jam').forEach(div => {
-
-                let jam = div.dataset.jam; // "08:00"
-                let jamInt = parseInt(jam); // 8
+                let jam = div.dataset.jam;
+                let jamInt = getJamAngka(jam);
 
                 div.classList.remove('booked', 'selected');
                 div.classList.add('tersedia');
 
                 transaksi.forEach(trx => {
                     if (trx.lapangan === namaLapangan) {
-
                         let jamTrx = trx.jam.trim();
 
                         if (jamTrx.includes(' - ')) {
-                            // ✅ format range: "08:00 - 10:00"
                             let range = jamTrx.split(' - ');
-                            let start = parseInt(range[0].trim()); // 8
-                            let end = parseInt(range[1].trim()); // 10
+                            let start = getJamAngka(range[0].trim());
+                            let end = getJamAngka(range[1].trim());
 
                             if (jamInt >= start && jamInt < end) {
                                 div.classList.remove('tersedia');
                                 div.classList.add('booked');
                             }
-
                         } else if (jamTrx.includes(',')) {
-                            // ✅ format multi: "08:00,09:00"
                             jamTrx.split(',').forEach(j => {
-                                if (jamInt === parseInt(j.trim())) {
+                                if (jamInt === getJamAngka(j.trim())) {
                                     div.classList.remove('tersedia');
                                     div.classList.add('booked');
                                 }
                             });
-
                         } else {
-                            // ✅ format tunggal: "08:00"
-                            if (jamInt === parseInt(jamTrx)) {
+                            if (jamInt === getJamAngka(jamTrx)) {
                                 div.classList.remove('tersedia');
                                 div.classList.add('booked');
                             }
@@ -335,17 +331,12 @@
 
             selectedJam.sort();
 
-            if (selectedJam.length > 2) {
-                document.getElementById('jam').value =
-                    selectedJam[0] + ' - ' + selectedJam[selectedJam.length - 1];
-            } else {
-                document.getElementById('jam').value = selectedJam.join(',');
-            }
+            // ✅ PERBAIKAN DI SINI
+            document.getElementById('jam').value = selectedJam.join(',');
 
             document.getElementById('durasi').value = selectedJam.length;
 
             let total = hargaAsli * selectedJam.length;
-
             document.getElementById('total_display').value = 'Rp ' + formatRibuan(total);
             document.getElementById('total_value').value = total;
 
@@ -388,9 +379,10 @@
             }
 
             if (bayar < total) {
-                alert('Uang kurang! Total: Rp ' + formatRibuan(total) + ', Bayar: Rp ' + formatRibuan(bayar));
+                alert('Uang kurang! Total: Rp ' + formatRibuan(total));
                 return false;
             }
+
             return true;
         }
     </script>

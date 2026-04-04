@@ -8,14 +8,12 @@ use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    // 🔹 Tampilkan user
     public function index()
     {
         $users = User::latest()->get();
         return view('admin.pengguna.index', compact('users'));
     }
 
-    // 🔹 Simpan user
     public function store(Request $request)
     {
         $request->validate([
@@ -39,7 +37,6 @@ class UserController extends Controller
             ->with('success', 'User berhasil ditambahkan!');
     }
 
-    // 🔹 Update user
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -66,7 +63,6 @@ class UserController extends Controller
         return back()->with('success', 'User berhasil diperbarui!');
     }
 
-    // 🔹 Hapus user
     public function destroy($id)
     {
         $user = User::findOrFail($id);
@@ -81,7 +77,6 @@ class UserController extends Controller
             ->with('success', 'User berhasil dihapus!');
     }
 
-    // 🔹 Toggle aktif/nonaktif user (tanpa hapus) ← BARU
     public function toggleStatus($id)
     {
         $user = User::findOrFail($id);

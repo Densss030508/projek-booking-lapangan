@@ -11,7 +11,6 @@ class LogActivityController extends Controller
     {
         $query = LogAktivitas::with('user');
 
-        // Filter search
         if ($request->filled('search')) {
             $query->where('activity', 'like', '%' . $request->search . '%')
                 ->orWhereHas('user', function ($q) use ($request) {
@@ -19,22 +18,18 @@ class LogActivityController extends Controller
                 });
         }
 
-        // Filter role
         if ($request->filled('role')) {
             $query->whereHas('user', function ($q) use ($request) {
                 $q->where('role', $request->role);
             });
         }
 
-        // Filter tanggal
         if ($request->filled('tanggal')) {
             $query->whereDate('created_at', $request->tanggal);
         }
 
-        // Get logs with pagination
         $logs = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        // Get statistics (menggunakan query builder agar tidak error)
         $totalLogs = LogAktivitas::count();
         $totalAdmin = LogAktivitas::whereHas('user', function ($q) {
             $q->where('role', 'admin');

@@ -18,12 +18,10 @@ class KasirController extends Controller
         $jumlahBooking = Transaksi::whereDate('tanggal', $today)->count();
         $totalTransaksi = Transaksi::whereDate('tanggal', $today)->sum('total');
 
-        // ✅ FIX: hanya hitung lapangan aktif
         $jumlahLapangan = Lapangan::where('status', '!=', 'nonaktif')->count();
 
         $transaksiHariIni = Transaksi::whereDate('tanggal', $today)->get();
 
-        // ✅ FIX: dashboard hanya tampilkan lapangan aktif
         $lapangans = Lapangan::where('status', '!=', 'nonaktif')->get();
 
         return view('kasir.dashboard', compact(
@@ -43,7 +41,6 @@ class KasirController extends Controller
         $totalTransaksi = Transaksi::whereDate('tanggal', $tanggal)->sum('total');
         $transaksiHariIni = Transaksi::whereDate('tanggal', $tanggal)->get();
 
-        // ✅ FIX: filter hanya lapangan aktif
         $lapangans = Lapangan::where('status', '!=', 'nonaktif')->get();
 
         $jadwal = [];
@@ -60,7 +57,7 @@ class KasirController extends Controller
                             $start = (int) date('H', strtotime(trim($range[0])));
                             $end = (int) date('H', strtotime(trim($range[1])));
 
-                            if ($i >= $start && $i <= $end) {
+                            if ($i >= $start && $i < $end) {
                                 $booked = true;
                                 break;
                             }
@@ -95,10 +92,16 @@ class KasirController extends Controller
     {
         $lapangans = Lapangan::where('status', '!=', 'nonaktif')->get();
 
-        $transaksi = Transaksi::all()->map(function ($trx) {
-            $trx->tanggal = Carbon::parse($trx->tanggal)->format('Y-m-d');
-            return $trx;
-        });
+        $transaksi = Transaksi::select('tanggal', 'lapangan', 'jam')
+            ->get()
+            ->map(function ($trx) {
+                return [
+                    'tanggal' => Carbon::parse($trx->tanggal)->format('Y-m-d'),
+                    'lapangan' => trim($trx->lapangan),
+                    'jam' => trim($trx->jam),
+                ];
+            })
+            ->values();
 
         return view('kasir.booking', compact('lapangans', 'transaksi'));
     }
@@ -151,9 +154,9 @@ class KasirController extends Controller
             'total'          => $total,
             'bayar'          => $bayar,
             'kembalian'      => $kembalian,
+            'kasir'          => Auth::user()->nama,
         ]);
 
-        // ✅ LOG AKTIVITAS FIX
         LogAktivitas::create([
             'id_user' => Auth::id(),
             'activity' => 'Membuat transaksi booking ' . $request->lapangan .

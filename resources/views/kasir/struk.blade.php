@@ -41,6 +41,7 @@
     <div class="line"></div>
 
     <div class="row"><span>ID</span><span>{{ $data->kode_transaksi }}</span></div>
+    <div class="row"><span>Kasir</span><span>{{ $data->kasir }}</span></div>
     <div class="row"><span>Nama</span><span>{{ $data->nama }}</span></div>
     <div class="row"><span>No HP</span><span>{{ $data->no_hp }}</span></div>
     <div class="row"><span>Lapangan</span><span>{{ $data->lapangan }}</span></div>

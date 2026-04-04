@@ -8,14 +8,12 @@ use Illuminate\Support\Facades\Storage;
 
 class LapanganController extends Controller
 {
-    // 🔹 Tampilkan semua lapangan
     public function index()
     {
         $lapangan = Lapangan::latest()->get();
         return view('admin.lapangan.index', compact('lapangan'));
     }
 
-    // 🔹 Simpan data baru
     public function store(Request $request)
     {
         $request->validate([
@@ -42,14 +40,12 @@ class LapanganController extends Controller
         return redirect()->back()->with('success', 'Lapangan berhasil ditambahkan!');
     }
 
-    // 🔹 Edit
     public function edit($id)
     {
         $lapangan = Lapangan::findOrFail($id);
         return view('admin.lapangan.edit', compact('lapangan'));
     }
 
-    // 🔹 Update
     public function update(Request $request, $id)
     {
         $lapangan = Lapangan::findOrFail($id);
@@ -76,7 +72,6 @@ class LapanganController extends Controller
         return redirect()->back()->with('success', 'Lapangan berhasil diperbarui!');
     }
 
-    // 🔹 Hapus
     public function destroy($id)
     {
         $lapangan = Lapangan::findOrFail($id);
@@ -90,7 +85,6 @@ class LapanganController extends Controller
         return redirect()->back()->with('success', 'Lapangan berhasil dihapus!');
     }
 
-    // 🔹 Toggle aktif/nonaktif lapangan (tanpa hapus) ← BARU
     public function toggleActive($id)
     {
         $lapangan = Lapangan::findOrFail($id);

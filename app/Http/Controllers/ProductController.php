@@ -42,7 +42,6 @@ class ProductController extends Controller
             'status'    => 'tersedia'
         ]);
 
-        // 🔥 Log
         LogAktivitas::create([
             'id_user'  => Auth::id(),
             'activity' => 'Menambah lapangan baru: ' . $request->nama,
@@ -86,7 +85,6 @@ class ProductController extends Controller
 
         $lapangan->update($data);
 
-        // 🔥 Log
         LogAktivitas::create([
             'id_user'  => Auth::id(),
             'activity' => 'Mengubah data lapangan: ' . $request->nama,
@@ -100,7 +98,6 @@ class ProductController extends Controller
     {
         $lapangan = Lapangan::findOrFail($id);
 
-        // 🔥 Simpan nama dulu sebelum dihapus
         $namaLapangan = $lapangan->nama;
 
         if ($lapangan->foto) {
@@ -109,7 +106,6 @@ class ProductController extends Controller
 
         $lapangan->delete();
 
-        // 🔥 Log
         LogAktivitas::create([
             'id_user'  => Auth::id(),
             'activity' => 'Menghapus lapangan: ' . $namaLapangan,

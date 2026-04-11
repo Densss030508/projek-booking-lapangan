@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>@yield('title')</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
@@ -72,7 +73,6 @@
             background: #dcdcdc;
         }
 
-        /* SIDEBAR */
         .sidebar {
             width: 230px;
             background: linear-gradient(180deg, #4f74c8, #3b63c5);
@@ -82,8 +82,6 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-
-            /* 🔥 FIX SIDEBAR DIAM */
             position: fixed;
             top: 0;
             left: 0;
@@ -99,7 +97,6 @@
             width: 120px;
         }
 
-        /* MENU */
         .menu a {
             display: block;
             padding: 10px;
@@ -117,7 +114,6 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* PROFILE */
         .profile {
             border-top: 1px solid rgba(255, 255, 255, 0.4);
             padding-top: 15px;
@@ -145,9 +141,7 @@
             font-size: 14px;
         }
 
-        /* MAIN */
         .main {
-            /* 🔥 FIX GESER KANAN SESUAI LEBAR SIDEBAR */
             margin-left: 230px;
             flex: 1;
             padding: 30px;
@@ -155,20 +149,17 @@
             background: #dcdcdc;
         }
 
-        /* TITLE */
         .page-title {
             font-size: 22px;
             margin-bottom: 20px;
         }
 
-        /* CARD BOX */
         .card-box {
             display: flex;
             gap: 15px;
             margin-bottom: 20px;
         }
 
-        /* CARD */
         .card {
             flex: 1;
             padding: 15px;
@@ -194,7 +185,6 @@
             font-size: 12px;
         }
 
-        /* WARNA CARD */
         .blue {
             background: #7ea6e0;
         }
@@ -211,14 +201,12 @@
             background: #f28b82;
         }
 
-        /* BOX PUTIH */
         .box {
             background: #ffffff;
             padding: 20px;
             border-radius: 6px;
         }
 
-        /* CHART */
         .chart {
             height: 300px;
             background: #f7f7f7;
@@ -284,14 +272,16 @@
 
             <div class="profile-box">
                 <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png">
-
-                <p>{{ ucfirst(auth()->user()->role ?? 'Owner') }}</p>
-                <small>{{ auth()->user()->nama ?? 'User' }}</small>
+                <div>
+                    <p>{{ ucfirst(auth()->user()->role ?? 'Owner') }}</p>
+                    <small>{{ auth()->user()->nama ?? 'User' }}</small>
+                </div>
             </div>
 
-            <form method="POST" action="{{ route('logout') }}">
+            <!-- ✅ tetap form lama, hanya diganti jadi reusable -->
+            <form method="POST" action="{{ route('logout') }}" class="logout-form">
                 @csrf
-                <button class="logout-btn">Log Out</button>
+                <button type="submit" class="logout-btn">Log Out</button>
             </form>
 
         </div>
@@ -301,6 +291,32 @@
     <div class="main">
         @yield('content')
     </div>
+
+    <!-- ✅ SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const logoutForm = document.querySelector('.logout-form');
+
+        if (logoutForm) {
+            logoutForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Yakin ingin logout?',
+                    text: "Session owner akan diakhiri.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Logout',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        logoutForm.submit();
+                    }
+                });
+            });
+        }
+    </script>
 
 </body>
 

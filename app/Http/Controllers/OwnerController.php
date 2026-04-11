@@ -83,7 +83,11 @@ class OwnerController extends Controller
             $query->where('lapangan', $lapangan);
         }
 
-        $transaksi = $query->orderBy('tanggal')->get();
+        $transaksi = $query
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+
         $lapangans = Lapangan::all();
 
         $totalPendapatan = $transaksi->sum('total');
@@ -136,7 +140,10 @@ class OwnerController extends Controller
             $query->where('lapangan', $lapangan);
         }
 
-        $transaksi = $query->orderBy('tanggal')->get();
+        $transaksi = $query
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
 
         $html = view('owner.laporan_pdf', compact(
             'transaksi',
@@ -171,7 +178,9 @@ class OwnerController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('activity', 'like', '%' . $search . '%')
                     ->orWhereHas('user', function ($user) use ($search) {
-                        $user->where('nama', 'like', '%' . $search . '%');
+                        $user->where('nama', 'like', '%' . $search . '%')
+                            ->orWhere('email', 'like', '%' . $search . '%')
+                            ->orWhere('role', 'like', '%' . $search . '%');
                     });
             });
         }

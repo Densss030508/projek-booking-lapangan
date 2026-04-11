@@ -8,6 +8,7 @@
         .title {
             font-size: 20px;
             margin-bottom: 5px;
+            font-weight: bold;
         }
 
         .subtitle {
@@ -20,10 +21,12 @@
             background: #ddd;
             padding: 15px;
             border-radius: 8px;
+            overflow-x: auto;
         }
 
         table {
             width: 100%;
+            min-width: 700px;
             border-collapse: collapse;
             background: #ccc;
         }
@@ -33,6 +36,7 @@
             border: 1px solid #888;
             padding: 10px;
             text-align: center;
+            white-space: nowrap;
         }
 
         th {
@@ -44,6 +48,7 @@
             color: white;
             padding: 5px 12px;
             border-radius: 4px;
+            display: inline-block;
         }
 
         .booking {
@@ -51,93 +56,70 @@
             color: white;
             padding: 5px 12px;
             border-radius: 4px;
+            display: inline-block;
+        }
+
+        .nonaktif {
+            color: #999;
+            font-weight: bold;
+        }
+
+        .empty-box {
+            background: #f39c12;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
         }
     </style>
 
     <div class="title">Jadwal Lapangan</div>
     <div class="subtitle">Tampilan Detail Lapangan Yang Tersedia</div>
 
-    {{-- 🔥 FILTER TANGGAL --}}
     <form method="GET" style="margin-bottom:15px;">
-        <input type="date" name="tanggal" value="{{ request('tanggal', date('Y-m-d')) }}">
+        <input type="date" name="tanggal" min="{{ date('Y-m-d') }}" value="{{ $tanggal }}">
         <button type="submit">Filter</button>
     </form>
 
-    @php
-        use App\Models\Transaksi;
-        use App\Models\Lapangan;
-
-        $lapangans = Lapangan::all();
-
-        // 🔥 ambil tanggal dari filter
-        $tanggal = request('tanggal', date('Y-m-d'));
-
-        $transaksiHariIni = Transaksi::whereDate('tanggal', $tanggal)->get();
-
-        function cekBooking($lapangan, $jam, $data)
-        {
-            foreach ($data as $trx) {
-                if ($trx->lapangan == $lapangan) {
-                    // 🔥 CEK RANGE
-                    if (str_contains($trx->jam, '-')) {
-                        $range = explode('-', $trx->jam);
-
-                        if (count($range) == 2) {
-                            $start = (int) date('H', strtotime(trim($range[0])));
-                            $end = (int) date('H', strtotime(trim($range[1])));
-
-                            if ($jam >= $start && $jam <= $end) {
-                                return true;
-                            }
-                        }
-                    } else {
-                        // 🔥 CEK CUSTOM
-                        $jamArray = explode(',', $trx->jam);
-
-                        foreach ($jamArray as $j) {
-                            $jamDb = (int) date('H', strtotime(trim($j)));
-
-                            if ($jam == $jamDb) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
-    @endphp
-
     <div class="table-box">
 
-        <table>
-            <tr>
-                <th>Jam</th>
-
-                @foreach ($lapangans as $lap)
-                    <th>{{ $lap->nama }}</th>
-                @endforeach
-            </tr>
-
-            @for ($i = 8; $i <= 22; $i++)
+        @if (count($lapangans) > 0 && count($jadwal) > 0)
+            <table>
                 <tr>
-                    <td>{{ sprintf('%02d.00', $i) }}</td>
-
+                    <th>Jam</th>
                     @foreach ($lapangans as $lap)
-                        <td>
-                            @if (cekBooking($lap->nama, $i, $transaksiHariIni))
-                                <span class="booking">Booking</span>
-                            @else
-                                <span class="kosong">Kosong</span>
-                            @endif
-                        </td>
+                        <th>{{ $lap->nama }}</th>
                     @endforeach
-
                 </tr>
-            @endfor
 
-        </table>
+                @foreach ($jadwal as $row)
+                    <tr>
+                        <td>{{ $row['jam'] }}</td>
+
+                        @foreach ($row['lapangans'] as $lap)
+                            <td>
+                                {{-- di luar jam operasional --}}
+                                @if ($lap['booked'] === null)
+                                    <span class="nonaktif">-</span>
+
+                                    {{-- sudah dibooking -> tampil nama customer merah --}}
+                                @elseif (is_string($lap['booked']) && $lap['booked'] !== '')
+                                    <span class="booking">{{ $lap['booked'] }}</span>
+
+                                    {{-- jam tersedia --}}
+                                @else
+                                    <span class="kosong">Kosong</span>
+                                @endif
+                            </td>
+                        @endforeach
+                    </tr>
+                @endforeach
+            </table>
+        @else
+            <div class="empty-box">
+                ⚠️ Belum ada data jadwal atau lapangan tersedia
+            </div>
+        @endif
 
     </div>
 

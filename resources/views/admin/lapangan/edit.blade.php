@@ -173,7 +173,6 @@
     </div>
 
     <script>
-        // ✅ Format harga saat mengetik: 120000 → 120.000
         function formatHarga(input) {
             let angka = input.value.replace(/\D/g, '');
             let formatted = angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');

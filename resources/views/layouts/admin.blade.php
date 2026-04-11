@@ -193,7 +193,8 @@
                 </div>
             </div>
 
-            <form action="{{ route('logout') }}" method="POST">
+            <!-- ✅ SWEETALERT TARGET -->
+            <form action="{{ route('logout') }}" method="POST" class="logout-form">
                 @csrf
                 <button type="submit" class="logout-btn">Logout</button>
             </form>
@@ -203,6 +204,34 @@
     <div class="main">
         @yield('content')
     </div>
+
+    <!-- ✅ SWEETALERT CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- ✅ SWEETALERT SCRIPT -->
+    <script>
+        const logoutForm = document.querySelector('.logout-form');
+
+        if (logoutForm) {
+            logoutForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Yakin ingin logout?',
+                    text: "Session Anda akan diakhiri dari sistem.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Logout',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        logoutForm.submit();
+                    }
+                });
+            });
+        }
+    </script>
 
 </body>
 

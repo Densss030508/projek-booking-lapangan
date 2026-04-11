@@ -40,10 +40,10 @@
 
         .card img {
             width: 100%;
-            height: 100px;
+            aspect-ratio: 16/9;
             object-fit: cover;
             border-radius: 8px;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
 
         .card.active {
@@ -55,6 +55,7 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            margin-top: 10px;
         }
 
         .jam {
@@ -64,7 +65,6 @@
             min-width: 70px;
             text-align: center;
             font-size: 12px;
-            background: #ccc;
         }
 
         .tersedia {
@@ -83,12 +83,30 @@
             color: white;
         }
 
+        .right label {
+            font-size: 13px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            margin-top: 10px;
+        }
+
+        .right small {
+            color: #555;
+            display: block;
+            margin-bottom: 5px;
+        }
+
         .right input {
             width: 100%;
             padding: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border-radius: 6px;
             border: none;
+        }
+
+        .readonly {
+            background: #f1f1f1;
         }
 
         button {
@@ -99,7 +117,7 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            margin-top: 5px;
+            margin-top: 10px;
         }
 
         .btn-cetak {
@@ -141,13 +159,6 @@
         </a>
     @endif
 
-    @php
-        $jamList = [];
-        for ($i = 8; $i <= 23; $i++) {
-            $jamList[] = sprintf('%02d:00', $i);
-        }
-    @endphp
-
     <div class="content-wrapper">
 
         <div class="left">
@@ -161,28 +172,19 @@
                 <div class="lapangan">
                     @foreach ($lapangans as $lap)
                         <div class="card"
-                            onclick="pilihLapangan(this, '{{ $lap->id }}', '{{ $lap->nama }}', '{{ $lap->harga }}')">
+                            onclick="pilihLapangan(this, '{{ $lap->id }}', '{{ $lap->nama }}', '{{ $lap->harga }}', '{{ $lap->jam_buka }}', '{{ $lap->jam_tutup }}')">
                             <img src="{{ asset('storage/' . $lap->foto) }}">
                             <p>{{ $lap->nama }}</p>
-                            <small>Rp {{ number_format($lap->harga, 0, ',', '.') }}/Jam</small>
-                            @if ($lap->status === 'tersedia')
-                                <span style="font-size:11px; color:#2ecc71;">✅ Tersedia</span>
-                            @else
-                                <span style="font-size:11px; color:#f39c12;">⏳ Tidak Tersedia</span>
-                            @endif
+                            <small>Rp {{ number_format($lap->harga, 0, ',', '.') }}/Jam</small><br>
+                            <small>{{ substr($lap->jam_buka, 0, 5) }} - {{ substr($lap->jam_tutup, 0, 5) }}</small>
                         </div>
                     @endforeach
                 </div>
             @endif
 
             <h4>2. Pilih Jam</h4>
-
-            <div class="jam-list">
-                @foreach ($jamList as $jam)
-                    <div class="jam tersedia" data-jam="{{ $jam }}">
-                        {{ $jam }}
-                    </div>
-                @endforeach
+            <div class="jam-list" id="jam-list">
+                <small style="color:#777;">Silakan pilih lapangan terlebih dahulu</small>
             </div>
         </div>
 
@@ -196,18 +198,41 @@
                 <input type="hidden" name="harga" id="harga_value">
                 <input type="hidden" name="total" id="total_value">
                 <input type="hidden" name="bayar" id="bayar_value">
-                <input type="hidden" name="kembalian" id="kembalian_value">
 
-                <input type="date" name="tanggal" id="tanggal" value="{{ date('Y-m-d') }}" required>
-                <input type="text" name="nama" placeholder="Nama" required>
-                <input type="text" name="no_hp" id="no_hp" placeholder="No HP" inputmode="numeric"
+                <label>Tanggal</label>
+                <small>Wajib diisi</small>
+                <input type="date" name="tanggal" id="tanggal" min="{{ date('Y-m-d') }}" value="{{ date('Y-m-d') }}"
+                    required>
+
+                <label>Nama Customer</label>
+                <small>Wajib diisi</small>
+                <input type="text" name="nama" placeholder="Masukkan nama" required>
+
+                <label>No HP</label>
+                <small>Wajib angka saja</small>
+                <input type="text" name="no_hp" placeholder="Masukkan no hp" inputmode="numeric"
                     oninput="this.value = this.value.replace(/\D/g, '')" required>
 
-                <input type="text" id="harga_display" readonly placeholder="Harga per jam">
-                <input type="text" name="durasi" id="durasi" readonly placeholder="Durasi (auto)">
-                <input type="text" id="total_display" readonly placeholder="Total">
-                <input type="text" id="bayar_display" placeholder="Bayar" oninput="hitungKembalian(this)" required>
-                <input type="text" id="kembalian_display" readonly placeholder="Kembalian">
+                <label>Harga per Jam</label>
+                <small>Otomatis dari lapangan</small>
+                <input type="text" id="harga_display" class="readonly" readonly>
+
+                <label>Durasi</label>
+                <small>Otomatis dari jumlah jam dipilih</small>
+                <input type="text" name="durasi" id="durasi" class="readonly" readonly>
+
+                <label>Total</label>
+                <small>Otomatis dihitung</small>
+                <input type="text" id="total_display" class="readonly" readonly>
+
+                <label>Bayar</label>
+                <small>Wajib diisi kasir</small>
+                <input type="text" id="bayar_display" placeholder="Masukkan uang bayar" oninput="hitungKembalian(this)"
+                    required>
+
+                <label>Kembalian</label>
+                <small>Otomatis dihitung</small>
+                <input type="text" id="kembalian_display" class="readonly" readonly>
 
                 <button type="submit">Simpan Transaksi</button>
             </form>
@@ -218,48 +243,46 @@
     <script>
         let selectedJam = [];
         let hargaAsli = 0;
+        let lapanganAktif = '';
         let semuaTransaksi = @json($transaksi);
         let transaksi = [];
         let tanggalInput = document.getElementById('tanggal');
 
         filterTanggal();
-        tanggalInput.addEventListener('change', filterTanggal);
 
-        function getTanggal(tgl) {
-            return String(tgl).substring(0, 10);
-        }
+        tanggalInput.addEventListener('change', function() {
+            let hariIni = new Date().toISOString().split('T')[0];
 
-        function getJamAngka(jamString) {
-            return parseInt(jamString.split(':')[0]);
-        }
+            if (this.value < hariIni) {
+                alert('Tidak bisa booking tanggal yang sudah lewat!');
+                this.value = hariIni;
+                return;
+            }
+
+            filterTanggal();
+
+            if (lapanganAktif) {
+                let cardAktif = document.querySelector('.card.active');
+                if (cardAktif) {
+                    cardAktif.click();
+                }
+            }
+        });
 
         function filterTanggal() {
-            let tgl = tanggalInput.value;
-            transaksi = semuaTransaksi.filter(trx => getTanggal(trx.tanggal) === tgl);
-
-            selectedJam = [];
-            document.getElementById('jam').value = '';
-            document.getElementById('durasi').value = '';
-            document.getElementById('total_display').value = '';
-            document.getElementById('total_value').value = '';
-
-            document.querySelectorAll('.jam').forEach(j => {
-                j.classList.remove('selected');
-            });
-
-            document.querySelectorAll('.card.active').forEach(el => {
-                let nama = el.querySelector('p').innerText;
-                renderJam(nama);
-            });
+            transaksi = semuaTransaksi.filter(trx => trx.tanggal === tanggalInput.value);
         }
 
         function formatRibuan(angka) {
-            return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            angka = angka.toString();
+            return angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
 
-        function pilihLapangan(el, id, nama, harga) {
+        function pilihLapangan(el, id, nama, harga, jamBuka, jamTutup) {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
+
+            lapanganAktif = nama;
 
             document.getElementById('lapangan_id').value = id;
             document.getElementById('lapangan').value = nama;
@@ -269,55 +292,54 @@
             document.getElementById('harga_value').value = hargaAsli;
 
             selectedJam = [];
-            document.querySelectorAll('.jam').forEach(j => {
-                j.classList.remove('selected');
-            });
+            document.getElementById('jam').value = '';
+            document.getElementById('durasi').value = '';
+            document.getElementById('total_display').value = '';
+            document.getElementById('total_value').value = '';
+            document.getElementById('bayar_display').value = '';
+            document.getElementById('bayar_value').value = '';
+            document.getElementById('kembalian_display').value = '';
 
-            renderJam(nama);
+            renderJam(nama, jamBuka, jamTutup);
         }
 
-        function renderJam(namaLapangan) {
-            document.querySelectorAll('.jam').forEach(div => {
-                let jam = div.dataset.jam;
-                let jamInt = getJamAngka(jam);
+        function renderJam(namaLapangan, jamBuka, jamTutup) {
+            let jamList = document.getElementById('jam-list');
+            jamList.innerHTML = '';
 
-                div.classList.remove('booked', 'selected');
-                div.classList.add('tersedia');
+            let buka = parseInt(jamBuka.split(':')[0]);
+            let tutup = parseInt(jamTutup.split(':')[0]);
+
+            // ✅ FIX JAM SLOT TERAKHIR IKUT TAMPIL
+            for (let i = buka; i <= tutup; i++) {
+                let jam = String(i).padStart(2, '0') + ':00';
+                let div = document.createElement('div');
+                div.className = 'jam';
+                div.innerText = jam;
+
+                let isBooked = false;
 
                 transaksi.forEach(trx => {
-                    if (trx.lapangan === namaLapangan) {
-                        let jamTrx = trx.jam.trim();
-
-                        if (jamTrx.includes(' - ')) {
-                            let range = jamTrx.split(' - ');
-                            let start = getJamAngka(range[0].trim());
-                            let end = getJamAngka(range[1].trim());
-
-                            if (jamInt >= start && jamInt < end) {
-                                div.classList.remove('tersedia');
-                                div.classList.add('booked');
+                    if (trx.lapangan.trim() === namaLapangan.trim()) {
+                        trx.jam.split(',').forEach(j => {
+                            if (jam === j.trim()) {
+                                isBooked = true;
                             }
-                        } else if (jamTrx.includes(',')) {
-                            jamTrx.split(',').forEach(j => {
-                                if (jamInt === getJamAngka(j.trim())) {
-                                    div.classList.remove('tersedia');
-                                    div.classList.add('booked');
-                                }
-                            });
-                        } else {
-                            if (jamInt === getJamAngka(jamTrx)) {
-                                div.classList.remove('tersedia');
-                                div.classList.add('booked');
-                            }
-                        }
+                        });
                     }
                 });
 
-                div.onclick = function() {
-                    if (div.classList.contains('booked')) return;
-                    pilihJam(div, jam);
-                };
-            });
+                if (isBooked) {
+                    div.classList.add('booked');
+                } else {
+                    div.classList.add('tersedia');
+                    div.onclick = function() {
+                        pilihJam(div, jam);
+                    };
+                }
+
+                jamList.appendChild(div);
+            }
         }
 
         function pilihJam(el, jam) {
@@ -330,43 +352,51 @@
             }
 
             selectedJam.sort();
-
-            // ✅ PERBAIKAN DI SINI
             document.getElementById('jam').value = selectedJam.join(',');
-
             document.getElementById('durasi').value = selectedJam.length;
 
             let total = hargaAsli * selectedJam.length;
             document.getElementById('total_display').value = 'Rp ' + formatRibuan(total);
             document.getElementById('total_value').value = total;
 
-            document.getElementById('bayar_display').value = '';
-            document.getElementById('bayar_value').value = '';
-            document.getElementById('kembalian_display').value = '';
-            document.getElementById('kembalian_value').value = '';
+            let bayar = parseInt(document.getElementById('bayar_value').value) || 0;
+            let kembalian = bayar - total;
+
+            document.getElementById('kembalian_display').value =
+                bayar > 0 ?
+                (kembalian >= 0 ?
+                    'Rp ' + formatRibuan(kembalian) :
+                    'Kurang: Rp ' + formatRibuan(Math.abs(kembalian))) :
+                '';
         }
 
         function hitungKembalian(input) {
-            let angkaMurni = input.value.replace(/\D/g, '');
-            input.value = formatRibuan(angkaMurni);
-            document.getElementById('bayar_value').value = angkaMurni;
+            let angka = input.value.replace(/\D/g, '');
+            input.value = angka ? formatRibuan(angka) : '';
+            document.getElementById('bayar_value').value = angka;
 
-            let bayar = parseInt(angkaMurni) || 0;
+            let bayar = parseInt(angka) || 0;
             let total = parseInt(document.getElementById('total_value').value) || 0;
             let kembalian = bayar - total;
 
-            if (kembalian >= 0) {
-                document.getElementById('kembalian_display').value = 'Rp ' + formatRibuan(kembalian);
-                document.getElementById('kembalian_value').value = kembalian;
-            } else {
-                document.getElementById('kembalian_display').value = 'Kurang: Rp ' + formatRibuan(Math.abs(kembalian));
-                document.getElementById('kembalian_value').value = kembalian;
-            }
+            document.getElementById('kembalian_display').value =
+                bayar > 0 ?
+                (kembalian >= 0 ?
+                    'Rp ' + formatRibuan(kembalian) :
+                    'Kurang: Rp ' + formatRibuan(Math.abs(kembalian))) :
+                '';
         }
 
         function validasiBayar() {
             let bayar = parseInt(document.getElementById('bayar_value').value) || 0;
             let total = parseInt(document.getElementById('total_value').value) || 0;
+            let tanggal = document.getElementById('tanggal').value;
+            let hariIni = new Date().toISOString().split('T')[0];
+
+            if (tanggal < hariIni) {
+                alert('Tanggal booking tidak boleh tanggal yang sudah lewat!');
+                return false;
+            }
 
             if (!document.getElementById('lapangan_id').value) {
                 alert('Pilih lapangan terlebih dahulu!');
@@ -379,7 +409,7 @@
             }
 
             if (bayar < total) {
-                alert('Uang kurang! Total: Rp ' + formatRibuan(total));
+                alert('Uang kurang!');
                 return false;
             }
 

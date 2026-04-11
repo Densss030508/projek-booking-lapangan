@@ -31,6 +31,9 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
         }
 
         .logo {
@@ -52,12 +55,9 @@
             border-radius: 5px;
         }
 
-        .menu a:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
+        .menu a:hover,
         .menu a.active {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         /* PROFILE */
@@ -75,6 +75,7 @@
 
         .profile-box img {
             width: 40px;
+            height: 40px;
         }
 
         .logout-btn {
@@ -90,8 +91,10 @@
 
         /* MAIN */
         .main {
-            flex: 1;
+            margin-left: 230px;
             padding: 30px;
+            min-height: 100vh;
+            flex: 1;
         }
 
         .title {
@@ -136,6 +139,7 @@
         .card {
             background: #efefef;
             padding: 20px;
+            border-radius: 8px;
         }
 
         .card h3 {
@@ -147,6 +151,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            background: white;
         }
 
         th,
@@ -162,14 +167,17 @@
 
         /* STATUS */
         .status-active {
-            background: #00ff00;
-            padding: 3px 10px;
+            background: #2ecc71;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
         }
 
         .status-non {
             background: red;
             color: white;
-            padding: 3px 10px;
+            padding: 4px 10px;
+            border-radius: 4px;
         }
 
         /* BUTTON */
@@ -178,6 +186,9 @@
             border: none;
             padding: 5px 12px;
             cursor: pointer;
+            text-decoration: none;
+            color: black;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -186,17 +197,28 @@
 
     <!-- SIDEBAR -->
     <div class="sidebar">
-
         <div>
             <div class="logo">
                 <img src="/images/kixa.png">
             </div>
 
             <div class="menu">
-                <a href="{{ route('admin.dashboard') }}" class="active">Dashboard</a>
-                <a href="{{ route('lapangan.index') }}">Kelola Lapangan</a>
-                <a href="{{ route('pengguna.index') }}">Kelola Pengguna</a>
-                <a href="{{ route('laporan.index') }}">Laporan</a>
+                <a href="{{ route('admin.dashboard') }}"
+                    class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                    Dashboard
+                </a>
+
+                <a href="{{ route('lapangan.index') }}" class="{{ request()->routeIs('lapangan.*') ? 'active' : '' }}">
+                    Kelola Lapangan
+                </a>
+
+                <a href="{{ route('pengguna.index') }}" class="{{ request()->routeIs('pengguna.*') ? 'active' : '' }}">
+                    Kelola Pengguna
+                </a>
+
+                <a href="{{ route('laporan.index') }}" class="{{ request()->routeIs('laporan.*') ? 'active' : '' }}">
+                    Laporan
+                </a>
             </div>
         </div>
 
@@ -210,12 +232,11 @@
                 </div>
             </div>
 
-            <form action="{{ route('logout') }}" method="POST">
+            <form action="{{ route('logout') }}" method="POST" class="logout-form">
                 @csrf
                 <button type="submit" class="logout-btn">Logout</button>
             </form>
         </div>
-
     </div>
 
     <!-- MAIN -->
@@ -285,6 +306,32 @@
         </div>
 
     </div>
+
+    <!-- SWEETALERT -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const logoutForm = document.querySelector('.logout-form');
+
+        if (logoutForm) {
+            logoutForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Yakin ingin logout?',
+                    text: "Session Anda akan diakhiri dari sistem.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Logout',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        logoutForm.submit();
+                    }
+                });
+            });
+        }
+    </script>
 
 </body>
 

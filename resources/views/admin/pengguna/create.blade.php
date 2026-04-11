@@ -69,6 +69,14 @@
             padding: 10px;
             border-radius: 6px;
         }
+
+        .info-box {
+            margin-bottom: 15px;
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 6px;
+        }
     </style>
 
     <div class="btn-group">
@@ -86,6 +94,24 @@
                 </div>
             @endif
 
+            @if (session('error'))
+                <div class="error-box">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if ($ownerSudahAda)
+                <div class="info-box">
+                    🔒 Role Owner sudah ada dan tidak bisa ditambahkan lagi.
+                </div>
+            @endif
+
+            @if ($adminSudahAda)
+                <div class="info-box">
+                    🔒 Role Admin sudah ada dan tidak bisa ditambahkan lagi.
+                </div>
+            @endif
+
             <div class="form-grid">
                 <div class="form-group">
                     <label>Nama Pengguna</label>
@@ -95,9 +121,17 @@
                 <div class="form-group">
                     <label>Peran</label>
                     <select name="role">
-                        <option value="admin">Admin</option>
+                        {{-- Admin hanya muncul kalau belum ada --}}
+                        @if (!$adminSudahAda)
+                            <option value="admin">Admin</option>
+                        @endif
+
                         <option value="kasir">Kasir</option>
-                        <option value="owner">Owner</option>
+
+                        {{-- Owner hanya muncul kalau belum ada --}}
+                        @if (!$ownerSudahAda)
+                            <option value="owner">Owner</option>
+                        @endif
                     </select>
                 </div>
 

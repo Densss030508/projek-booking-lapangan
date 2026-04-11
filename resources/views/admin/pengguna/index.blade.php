@@ -60,15 +60,14 @@
                                 <span class="status-non">Di NonAktifkan</span>
                             @endif
                         </td>
+
                         <td style="display:flex; gap:8px; align-items:center; justify-content:center;">
 
                             {{-- Tombol Edit --}}
-                            @if ($user->status === 'aktif')
-                                <a href="{{ route('pengguna.edit', $user->id) }}" class="btn-edit">Edit</a>
-                            @endif
+                            <a href="{{ route('pengguna.edit', $user->id) }}" class="btn-edit">Edit</a>
 
-                            {{-- Tombol Aktifkan / Nonaktifkan --}}
-                            @if (Auth::id() != $user->id)
+                            {{-- Tombol toggle hanya selain owner --}}
+                            @if (Auth::id() != $user->id && $user->role != 'owner')
                                 <form id="form-toggle-{{ $user->id }}"
                                     action="{{ route('pengguna.toggleStatus', $user->id) }}" method="POST"
                                     style="display:inline;">
@@ -92,6 +91,20 @@
                                         {{ $user->status === 'aktif' ? '⛔ Nonaktifkan' : '✅ Aktifkan' }}
                                     </button>
                                 </form>
+                            @endif
+
+                            {{-- Info khusus owner --}}
+                            @if ($user->role == 'owner')
+                                <span
+                                    style="
+                                        background:#3498db;
+                                        color:white;
+                                        padding:6px 12px;
+                                        border-radius:6px;
+                                        font-size:13px;
+                                    ">
+                                    🔒 Owner Protected
+                                </span>
                             @endif
 
                         </td>

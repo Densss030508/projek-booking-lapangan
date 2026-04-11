@@ -90,7 +90,7 @@
             text-decoration: none;
         }
 
-        /* 🔥 Filter tanggal */
+        /* FILTER TANGGAL */
         .filter-tanggal {
             display: flex;
             align-items: center;
@@ -107,17 +107,18 @@
     </style>
 
     <div class="title">Dashboard Kasir</div>
+
     <div class="tanggal-hari-ini" id="labelTanggal">
         📅 {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
     </div>
 
-    {{-- 🔥 Filter Tanggal --}}
+    <!-- FILTER TANGGAL -->
     <div class="filter-tanggal">
         <label><strong>Filter Tanggal:</strong></label>
         <input type="date" id="filterTanggal" value="{{ date('Y-m-d') }}">
     </div>
 
-    <!-- CARDS -->
+    <!-- CARD -->
     <div class="cards">
         <div class="card blue">
             <h2 id="cardBooking">{{ $jumlahBooking }}</h2>
@@ -138,8 +139,14 @@
     <!-- TABLE -->
     <div class="table-box">
 
-        <h3>Jadwal Lapangan — <span id="labelJadwal">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span></h3>
-        <a href="{{ route('kasir.jadwal') }}" class="btn-lihat">Lihat Jadwal Lengkap</a>
+        <h3>
+            Jadwal Lapangan —
+            <span id="labelJadwal">{{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</span>
+        </h3>
+
+        <a href="{{ route('kasir.jadwal') }}" class="btn-lihat">
+            Lihat Jadwal Lengkap
+        </a>
 
         <br><br>
 
@@ -148,7 +155,6 @@
             {
                 foreach ($data as $trx) {
                     if ($trx->lapangan == $lapangan) {
-                        // RANGE
                         if (str_contains($trx->jam, '-')) {
                             $range = explode('-', $trx->jam);
                             $start = (int) date('H', strtotime(trim($range[0])));
@@ -158,7 +164,6 @@
                                 return true;
                             }
                         } else {
-                            // CUSTOM
                             $arr = explode(',', $trx->jam);
 
                             foreach ($arr as $j) {
@@ -198,61 +203,67 @@
                             @endif
                         </td>
                     @endforeach
-
                 </tr>
             @endfor
         </table>
-
     </div>
 
     <script>
         const lapangans = @json($lapangans->pluck('nama'));
 
-        // Format tanggal jadi: Senin, 01 April 2026
         function formatTanggalIndo(dateStr) {
             const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
                 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
             ];
+
             const d = new Date(dateStr + 'T00:00:00');
-            return hari[d.getDay()] + ', ' + String(d.getDate()).padStart(2, '0') +
-                ' ' + bulan[d.getMonth()] + ' ' + d.getFullYear();
+
+            return hari[d.getDay()] + ', ' +
+                String(d.getDate()).padStart(2, '0') + ' ' +
+                bulan[d.getMonth()] + ' ' +
+                d.getFullYear();
         }
 
         document.getElementById('filterTanggal').addEventListener('change', function() {
             const tanggal = this.value;
 
-            // Update label tanggal atas
-            document.getElementById('labelTanggal').innerHTML = '📅 ' + formatTanggalIndo(tanggal);
+            document.getElementById('labelTanggal').innerHTML =
+                '📅 ' + formatTanggalIndo(tanggal);
 
-            // Update label judul jadwal
             const d = new Date(tanggal + 'T00:00:00');
             const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
                 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
             ];
-            document.getElementById('labelJadwal').innerText =
-                String(d.getDate()).padStart(2, '0') + ' ' + bulan[d.getMonth()] + ' ' + d.getFullYear();
 
-            // AJAX ke controller
+            document.getElementById('labelJadwal').innerText =
+                String(d.getDate()).padStart(2, '0') + ' ' +
+                bulan[d.getMonth()] + ' ' +
+                d.getFullYear();
+
             fetch('{{ route('kasir.dashboardFilter') }}?tanggal=' + tanggal)
                 .then(res => res.json())
                 .then(data => {
-                    // Update card booking & transaksi
-                    document.getElementById('cardBooking').innerText = data.jumlahBooking;
-                    document.getElementById('cardTransaksi').innerText = data.totalTransaksi;
+                    document.getElementById('cardBooking').innerText =
+                        data.jumlahBooking;
 
-                    // Update tabel jadwal
+                    document.getElementById('cardTransaksi').innerText =
+                        data.totalTransaksi;
+
                     let html = '<tr><th>Jam</th>';
+
                     lapangans.forEach(n => html += '<th>' + n + '</th>');
                     html += '</tr>';
 
                     data.jadwal.forEach(row => {
                         html += '<tr><td>' + row.jam + '</td>';
+
                         row.lapangans.forEach(lap => {
                             html += '<td>' + (lap.booked ?
                                 '<span class="booking">Booking</span>' :
                                 '<span class="kosong">Kosong</span>') + '</td>';
                         });
+
                         html += '</tr>';
                     });
 

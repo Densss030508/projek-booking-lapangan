@@ -81,12 +81,45 @@
         .btn-delete {
             background: #e74c3c;
         }
+
+        /* ✅ NOTIFIKASI */
+        .success-box {
+            background: #2ecc71;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .error-box {
+            background: #e74c3c;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
     </style>
 
     <div class="btn-top">
         <h2>Edit Pengguna</h2>
         <a href="{{ route('pengguna.index') }}" class="btn-back">← Kembali</a>
     </div>
+
+    {{-- ✅ NOTIF BERHASIL --}}
+    @if (session('success'))
+        <div class="success-box">
+            ✅ {{ session('success') }}
+        </div>
+    @endif
+
+    {{-- ✅ NOTIF ERROR --}}
+    @if (session('error'))
+        <div class="error-box">
+            ⚠️ {{ session('error') }}
+        </div>
+    @endif
 
     <div class="container-form">
         <form id="updateForm" action="{{ route('pengguna.update', $user->id) }}" method="POST">
@@ -101,7 +134,7 @@
 
                 <div class="form-group">
                     <label>Peran</label>
-                    <div class="form-disabled">Tidak Bisa Di Ubah Ketika Di Edit</div>
+                    <div class="form-disabled">{{ ucfirst($user->role) }}</div>
                 </div>
 
                 <div class="form-group">
@@ -112,7 +145,11 @@
                 <div class="form-group">
                     <label>Status</label>
                     <div class="form-disabled">
-                        {{ $user->status == 'aktif' ? '✅ Aktif' : '❌ Nonaktif' }}
+                        @if ($user->role == 'owner')
+                            🔒 Owner selalu aktif
+                        @else
+                            {{ $user->status == 'aktif' ? '✅ Aktif' : '❌ Nonaktif' }}
+                        @endif
                     </div>
                 </div>
 
@@ -128,9 +165,15 @@
             </div>
 
             <div class="btn-action">
-                <button type="button" onclick="confirmDelete()" class="btn-delete">
-                    Hapus Pengguna
-                </button>
+                @if ($user->role != 'owner')
+                    <button type="button" onclick="confirmDelete()" class="btn-delete">
+                        Hapus Pengguna
+                    </button>
+                @else
+                    <button type="button" class="btn-delete" style="background:#95a5a6; cursor:not-allowed;">
+                        🔒 Owner Tidak Bisa Dihapus
+                    </button>
+                @endif
 
                 <button type="button" onclick="confirmUpdate()" class="btn-save">
                     + Simpan Pengguna
@@ -138,10 +181,12 @@
             </div>
         </form>
 
-        <form id="deleteForm" action="{{ route('pengguna.destroy', $user->id) }}" method="POST">
-            @csrf
-            @method('DELETE')
-        </form>
+        @if ($user->role != 'owner')
+            <form id="deleteForm" action="{{ route('pengguna.destroy', $user->id) }}" method="POST">
+                @csrf
+                @method('DELETE')
+            </form>
+        @endif
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

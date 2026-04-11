@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Lapangan;
+use App\Models\LogAktivitas;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class LapanganController extends Controller
 {
@@ -28,13 +30,19 @@ class LapanganController extends Controller
             $fotoPath = $request->file('foto')->store('lapangan', 'public');
         }
 
-        Lapangan::create([
+        $lapangan = Lapangan::create([
             'nama' => $request->nama,
             'status' => $request->status,
             'harga' => $request->harga,
             'foto' => $fotoPath,
             'jam_buka' => '08:00',
             'jam_tutup' => '23:00'
+        ]);
+
+        // ✅ LOG AKTIVITAS
+        LogAktivitas::create([
+            'id_user' => Auth::id(),
+            'activity' => 'Menambahkan lapangan: ' . $lapangan->nama
         ]);
 
         return redirect()->back()->with('success', 'Lapangan berhasil ditambahkan!');
@@ -60,6 +68,7 @@ class LapanganController extends Controller
             if ($lapangan->foto && Storage::exists('public/' . $lapangan->foto)) {
                 Storage::delete('public/' . $lapangan->foto);
             }
+
             $lapangan->foto = $request->file('foto')->store('lapangan', 'public');
         }
 
@@ -67,6 +76,13 @@ class LapanganController extends Controller
             'nama' => $request->nama,
             'status' => $request->status,
             'harga' => $request->harga,
+            'foto' => $lapangan->foto
+        ]);
+
+        // ✅ LOG AKTIVITAS
+        LogAktivitas::create([
+            'id_user' => Auth::id(),
+            'activity' => 'Mengubah data lapangan: ' . $lapangan->nama
         ]);
 
         return redirect()->back()->with('success', 'Lapangan berhasil diperbarui!');
@@ -75,12 +91,19 @@ class LapanganController extends Controller
     public function destroy($id)
     {
         $lapangan = Lapangan::findOrFail($id);
+        $namaLapangan = $lapangan->nama;
 
         if ($lapangan->foto && Storage::exists('public/' . $lapangan->foto)) {
             Storage::delete('public/' . $lapangan->foto);
         }
 
         $lapangan->delete();
+
+        // ✅ LOG AKTIVITAS
+        LogAktivitas::create([
+            'id_user' => Auth::id(),
+            'activity' => 'Menghapus lapangan: ' . $namaLapangan
+        ]);
 
         return redirect()->back()->with('success', 'Lapangan berhasil dihapus!');
     }
@@ -98,6 +121,12 @@ class LapanganController extends Controller
         }
 
         $lapangan->save();
+
+        // ✅ LOG AKTIVITAS
+        LogAktivitas::create([
+            'id_user' => Auth::id(),
+            'activity' => 'Mengubah status lapangan ' . $lapangan->nama . ' menjadi ' . $lapangan->status
+        ]);
 
         return back()->with('success', "Lapangan berhasil {$pesan}!");
     }

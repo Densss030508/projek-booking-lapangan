@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('lapangans', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
-            $table->string('status'); // tersedia / tidak
+            $table->string('status');
             $table->integer('harga');
             $table->string('foto')->nullable();
             $table->time('jam_buka');

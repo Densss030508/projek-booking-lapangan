@@ -17,11 +17,8 @@ class KasirController extends Controller
 
         $jumlahBooking = Transaksi::whereDate('tanggal', $today)->count();
         $totalTransaksi = Transaksi::whereDate('tanggal', $today)->sum('total');
-
         $jumlahLapangan = Lapangan::where('status', '!=', 'nonaktif')->count();
-
         $transaksiHariIni = Transaksi::whereDate('tanggal', $today)->get();
-
         $lapangans = Lapangan::where('status', '!=', 'nonaktif')->get();
 
         return view('kasir.dashboard', compact(
@@ -40,41 +37,28 @@ class KasirController extends Controller
         $jumlahBooking = Transaksi::whereDate('tanggal', $tanggal)->count();
         $totalTransaksi = Transaksi::whereDate('tanggal', $tanggal)->sum('total');
         $transaksiHariIni = Transaksi::whereDate('tanggal', $tanggal)->get();
-
         $lapangans = Lapangan::where('status', '!=', 'nonaktif')->get();
 
+        $jamMulai = $lapangans->isNotEmpty()
+            ? $lapangans->min(fn($lap) => (int) substr($lap->jam_buka, 0, 2))
+            : 8;
+
+        $jamSelesai = $lapangans->isNotEmpty()
+            ? $lapangans->max(fn($lap) => (int) substr($lap->jam_tutup, 0, 2))
+            : 23;
+
         $jadwal = [];
-        for ($i = 8; $i <= 12; $i++) {
-            $row = ['jam' => sprintf('%02d.00', $i), 'lapangans' => []];
+
+        for ($i = $jamMulai; $i <= $jamSelesai; $i++) {
+            $row = [
+                'jam' => sprintf('%02d.00', $i),
+                'lapangans' => []
+            ];
 
             foreach ($lapangans as $lap) {
-                $booked = false;
-
-                foreach ($transaksiHariIni as $trx) {
-                    if ($trx->lapangan == $lap->nama) {
-                        if (str_contains($trx->jam, '-')) {
-                            $range = explode('-', $trx->jam);
-                            $start = (int) date('H', strtotime(trim($range[0])));
-                            $end = (int) date('H', strtotime(trim($range[1])));
-
-                            if ($i >= $start && $i < $end) {
-                                $booked = true;
-                                break;
-                            }
-                        } else {
-                            foreach (explode(',', $trx->jam) as $j) {
-                                if ($i == (int) date('H', strtotime(trim($j)))) {
-                                    $booked = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
                 $row['lapangans'][] = [
                     'nama' => $lap->nama,
-                    'booked' => $booked
+                    'booked' => $this->cekStatusBooking($lap, $i, $transaksiHariIni)
                 ];
             }
 
@@ -106,9 +90,38 @@ class KasirController extends Controller
         return view('kasir.booking', compact('lapangans', 'transaksi'));
     }
 
-    public function transaksi()
+    public function transaksi(Request $request)
     {
-        $transaksi = Transaksi::latest()->get();
+        $query = Transaksi::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', '%' . $search . '%')
+                    ->orWhere('kode_transaksi', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal', $request->tanggal);
+        }
+
+        if ($request->filter == 'hari') {
+            $query->whereDate('tanggal', now()->toDateString());
+        }
+
+        if ($request->filter == 'bulan') {
+            $query->whereMonth('tanggal', now()->month)
+                ->whereYear('tanggal', now()->year);
+        }
+
+        if ($request->filter == 'tahun') {
+            $query->whereYear('tanggal', now()->year);
+        }
+
+        $transaksi = $query->latest()->get();
+
         return view('kasir.transaksi', compact('transaksi'));
     }
 
@@ -125,6 +138,12 @@ class KasirController extends Controller
             'tanggal'  => 'required|date',
         ]);
 
+        if (Carbon::parse($request->tanggal)->lt(Carbon::today())) {
+            return back()
+                ->withInput()
+                ->with('error', 'Tidak bisa booking untuk tanggal yang sudah lewat!');
+        }
+
         $lapangan = Lapangan::where('nama', $request->lapangan)
             ->where('status', '!=', 'nonaktif')
             ->first();
@@ -140,6 +159,31 @@ class KasirController extends Controller
         $durasi = (int) $request->durasi;
         $total = $harga * $durasi;
         $kembalian = $bayar - $total;
+
+        if ($bayar < $total) {
+            return back()
+                ->withInput()
+                ->with('error', 'Uang bayar kurang!');
+        }
+
+        $jamDipilih = array_map('trim', explode(',', $request->jam));
+
+        $transaksiBentrok = Transaksi::whereDate('tanggal', $request->tanggal)
+            ->where('lapangan', $request->lapangan)
+            ->get();
+
+        foreach ($transaksiBentrok as $trx) {
+            $jamBooked = array_map('trim', explode(',', $trx->jam));
+
+            foreach ($jamDipilih as $jam) {
+                if (in_array($jam, $jamBooked)) {
+                    return back()
+                        ->withInput()
+                        ->with('error', 'Jam ' . $jam . ' sudah dibooking!');
+                }
+            }
+        }
+
         $kode = 'TRX-' . now()->format('Ymd') . '-' . rand(100, 999);
 
         $transaksi = Transaksi::create([
@@ -176,8 +220,68 @@ class KasirController extends Controller
         return view('kasir.struk', compact('data'));
     }
 
-    public function jadwal()
+    public function jadwal(Request $request)
     {
-        return view('kasir.jadwal');
+        $tanggal = $request->tanggal ?? date('Y-m-d');
+
+        $lapangans = Lapangan::where('status', '!=', 'nonaktif')->get();
+        $transaksi = Transaksi::whereDate('tanggal', $tanggal)->get();
+
+        $jamMulai = $lapangans->isNotEmpty()
+            ? $lapangans->min(fn($lap) => (int) substr($lap->jam_buka, 0, 2))
+            : 8;
+
+        $jamSelesai = $lapangans->isNotEmpty()
+            ? $lapangans->max(fn($lap) => (int) substr($lap->jam_tutup, 0, 2))
+            : 23;
+
+        $jadwal = [];
+
+        for ($i = $jamMulai; $i <= $jamSelesai; $i++) {
+            $row = [
+                'jam' => sprintf('%02d.00', $i),
+                'lapangans' => []
+            ];
+
+            foreach ($lapangans as $lap) {
+                $row['lapangans'][] = [
+                    'nama' => $lap->nama,
+                    'booked' => $this->cekStatusBooking($lap, $i, $transaksi)
+                ];
+            }
+
+            $jadwal[] = $row;
+        }
+
+        return view('kasir.jadwal', compact('jadwal', 'lapangans', 'tanggal'));
+    }
+
+    private function cekStatusBooking($lap, $jam, $transaksi)
+    {
+        $buka = (int) substr(trim($lap->jam_buka), 0, 2);
+        $tutup = (int) substr(trim($lap->jam_tutup), 0, 2);
+
+
+        if ($jam < $buka || $jam > $tutup) {
+            return null;
+        }
+
+        foreach ($transaksi as $trx) {
+            if (trim($trx->lapangan) !== trim($lap->nama)) {
+                continue;
+            }
+
+            $jamDb = trim($trx->jam);
+
+            foreach (explode(',', $jamDb) as $j) {
+                $jamBooking = (int) substr(trim($j), 0, 2);
+
+                if ($jam == $jamBooking) {
+                    return $trx->nama;
+                }
+            }
+        }
+
+        return false;
     }
 }

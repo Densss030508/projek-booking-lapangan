@@ -18,7 +18,6 @@
             background: #4aa3b5;
         }
 
-        /* ✅ SIDEBAR FIX (TIDAK IKUT SCROLL) */
         .sidebar {
             width: 230px;
             height: 100vh;
@@ -78,7 +77,6 @@
             font-size: 14px;
         }
 
-        /* ✅ CONTENT DIGESER */
         .content {
             margin-left: 230px;
             flex: 1;
@@ -255,44 +253,6 @@
             </div>
         </form>
 
-        @php
-            use Carbon\Carbon;
-
-            $data = $transaksi;
-
-            if (request('search')) {
-                $keyword = strtolower(request('search'));
-
-                $data = $data->filter(function ($item) use ($keyword) {
-                    return str_contains(strtolower($item->nama), $keyword) ||
-                        str_contains(strtolower($item->kode_transaksi), $keyword);
-                });
-            }
-
-            if (request('tanggal')) {
-                $data = $data->where('tanggal', request('tanggal'));
-            }
-
-            if (request('filter') == 'hari') {
-                $data = $data->where('tanggal', Carbon::today()->toDateString());
-            }
-
-            if (request('filter') == 'bulan') {
-                $start = Carbon::now()->startOfMonth();
-                $end = Carbon::now()->endOfMonth();
-
-                $data = $data->filter(function ($item) use ($start, $end) {
-                    return Carbon::parse($item->tanggal)->between($start, $end);
-                });
-            }
-
-            if (request('filter') == 'tahun') {
-                $data = $data->filter(function ($item) {
-                    return Carbon::parse($item->tanggal)->year == Carbon::now()->year;
-                });
-            }
-        @endphp
-
         <div class="table-box">
             <table>
                 <tr>
@@ -309,12 +269,25 @@
                     <th>Aksi</th>
                 </tr>
 
-                @forelse ($data as $item)
+                @forelse ($transaksi as $item)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d M Y') }}</td>
                         <td>{{ $item->lapangan }}</td>
-                        <td>{{ $item->jam }}</td>
+
+                        <td>
+                            @php
+                                $jamArray = array_map('trim', explode(',', $item->jam));
+                                $jumlahJam = count($jamArray);
+                            @endphp
+
+                            @if ($jumlahJam >= 4)
+                                {{ $jamArray[0] }} - {{ end($jamArray) }}
+                            @else
+                                {{ implode(', ', $jamArray) }}
+                            @endif
+                        </td>
+
                         <td>{{ $item->durasi }} Jam</td>
                         <td>{{ $item->nama }}</td>
                         <td>Rp. {{ number_format($item->total, 0, ',', '.') }}</td>

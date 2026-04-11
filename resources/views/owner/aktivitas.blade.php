@@ -10,7 +10,6 @@
         }, 5000);
     </script>
 
-    {{-- ✅ Auto refresh setiap 5 detik --}}
     <meta http-equiv="refresh" content="5">
 
     <style>

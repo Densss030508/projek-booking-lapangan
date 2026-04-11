@@ -47,7 +47,7 @@
 
 <body>
 
-    <h3>Laporan Transaksi</h3>
+    <h3>Laporan Transaksi KIXA</h3>
     <p>
         Periode:
         {{ $dari ? date('d/m/Y', strtotime($dari)) : '-' }}

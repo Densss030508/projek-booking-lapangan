@@ -6,6 +6,8 @@
     <title>@yield('title')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
     <style>
         * {
             margin: 0;
@@ -23,20 +25,16 @@
             min-height: 100vh;
         }
 
-        /* SIDEBAR */
         .sidebar {
             width: 230px;
             background: linear-gradient(#4e73df, #224abe);
             color: white;
-
-            /* 🔥 FIX SIDEBAR DIAM */
             position: fixed;
             top: 0;
             left: 0;
             height: 100vh;
             z-index: 100;
             flex-shrink: 0;
-
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -73,7 +71,6 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* BOTTOM */
         .bottom {
             padding: 20px;
             text-align: center;
@@ -90,9 +87,7 @@
             font-size: 14px;
         }
 
-        /* CONTENT */
         .content {
-            /* 🔥 FIX GESER KANAN SESUAI LEBAR SIDEBAR */
             margin-left: 230px;
             flex: 1;
             background: #e5e5e5;
@@ -108,7 +103,6 @@
 
     <div class="container">
 
-        <!-- SIDEBAR -->
         <div class="sidebar">
 
             <div class="top">
@@ -145,20 +139,47 @@
                 <p>{{ ucfirst(auth()->user()->role ?? 'Kasir') }}</p>
                 <small>{{ auth()->user()->nama ?? 'User' }}</small>
 
-                <form action="{{ route('logout') }}" method="POST">
+                <!-- ✅ tetap form lama, hanya ditambah class -->
+                <form action="{{ route('logout') }}" method="POST" class="logout-form">
                     @csrf
-                    <button class="logout-btn">Log Out</button>
+                    <button type="submit" class="logout-btn">Log Out</button>
                 </form>
             </div>
 
         </div>
 
-        <!-- CONTENT -->
         <div class="content">
             @yield('content')
         </div>
 
     </div>
+
+    <!-- ✅ SweetAlert modern -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        const logoutForm = document.querySelector('.logout-form');
+
+        if (logoutForm) {
+            logoutForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Yakin ingin logout?',
+                    text: "Session kasir akan diakhiri.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Logout',
+                    cancelButtonText: 'Batal',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        logoutForm.submit();
+                    }
+                });
+            });
+        }
+    </script>
 
 </body>
 

@@ -35,12 +35,12 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::patch('/lapangan/{id}/toggle-active', [LapanganController::class, 'toggleActive'])->name('lapangan.toggleActive');
 
     Route::get('/pengguna', [UserController::class, 'index'])->name('pengguna.index');
-    Route::get('/pengguna/create', fn() => view('admin.pengguna.create'))->name('pengguna.create');
 
-    Route::get('/pengguna/{id}/edit', function ($id) {
-        $user = \App\Models\User::find($id);
-        return view('admin.pengguna.edit', compact('user'));
-    })->name('pengguna.edit');
+    // ✅ FIX: pakai controller create()
+    Route::get('/pengguna/create', [UserController::class, 'create'])->name('pengguna.create');
+
+    // ✅ FIX: edit juga lebih bagus pakai controller
+    Route::get('/pengguna/{id}/edit', [UserController::class, 'edit'])->name('pengguna.edit');
 
     Route::post('/pengguna/store', [UserController::class, 'store'])->name('pengguna.store');
     Route::put('/pengguna/{id}', [UserController::class, 'update'])->name('pengguna.update');

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
@@ -21,8 +22,17 @@ Route::post('/login', [AuthController::class, 'login']);
 /* LOGOUT */
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-/* ADMIN */
-Route::middleware('auth')->prefix('admin')->group(function () {
+
+/* =========================
+   ADMIN
+========================= */
+Route::prefix('admin')->middleware(['force.app', 'auth'])->group(function () {
+
+    Route::middleware('auth')->group(function () {
+        if (Auth::check() && Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+    });
 
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
 
@@ -35,13 +45,8 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::patch('/lapangan/{id}/toggle-active', [LapanganController::class, 'toggleActive'])->name('lapangan.toggleActive');
 
     Route::get('/pengguna', [UserController::class, 'index'])->name('pengguna.index');
-
-    // ✅ FIX: pakai controller create()
     Route::get('/pengguna/create', [UserController::class, 'create'])->name('pengguna.create');
-
-    // ✅ FIX: edit juga lebih bagus pakai controller
     Route::get('/pengguna/{id}/edit', [UserController::class, 'edit'])->name('pengguna.edit');
-
     Route::post('/pengguna/store', [UserController::class, 'store'])->name('pengguna.store');
     Route::put('/pengguna/{id}', [UserController::class, 'update'])->name('pengguna.update');
     Route::delete('/pengguna/{id}', [UserController::class, 'destroy'])->name('pengguna.destroy');
@@ -50,13 +55,18 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/laporan', [AdminController::class, 'laporan'])->name('laporan.index');
 });
 
+
 /* KASIR */
-Route::middleware('auth')->prefix('kasir')->group(function () {
+Route::prefix('kasir')->middleware(['force.app', 'auth'])->group(function () {
+
+    Route::middleware('auth')->group(function () {
+        if (Auth::check() && Auth::user()->role !== 'kasir') {
+            abort(403);
+        }
+    });
 
     Route::get('/dashboard', [KasirController::class, 'dashboard'])->name('kasir.dashboard');
     Route::get('/jadwal', [KasirController::class, 'jadwal'])->name('kasir.jadwal');
-
-    // ✅ route filter dashboard
     Route::get('/dashboard-filter', [KasirController::class, 'dashboardFilter'])->name('kasir.dashboardFilter');
 
     Route::get('/transaksi', [KasirController::class, 'transaksi'])->name('kasir.transaksi');
@@ -66,8 +76,15 @@ Route::middleware('auth')->prefix('kasir')->group(function () {
     Route::get('/struk/{id}', [KasirController::class, 'struk'])->name('kasir.struk');
 });
 
+
 /* OWNER */
-Route::middleware('auth')->prefix('owner')->group(function () {
+Route::prefix('owner')->middleware(['force.app', 'auth'])->group(function () {
+
+    Route::middleware('auth')->group(function () {
+        if (Auth::check() && Auth::user()->role !== 'owner') {
+            abort(403);
+        }
+    });
 
     Route::get('/dashboard', [OwnerController::class, 'dashboard'])->name('owner.dashboard');
     Route::get('/produk', [OwnerController::class, 'produk'])->name('owner.produk');
@@ -76,12 +93,7 @@ Route::middleware('auth')->prefix('owner')->group(function () {
     Route::get('/laporan/excel', [OwnerController::class, 'exportExcel'])->name('owner.exportExcel');
     Route::get('/laporan/pdf', [OwnerController::class, 'exportPdf'])->name('owner.exportPdf');
 
-    // ✅ log utama owner
     Route::get('/aktivitas', [OwnerController::class, 'aktivitas'])->name('owner.aktivitas');
-
-    // ✅ optional halaman alternatif log
     Route::get('/log-activity', [LogActivityController::class, 'index'])->name('log-activity.index');
-
-    // ✅ sidebar langsung ke aktivitas
     Route::get('/log-sidebar', [OwnerController::class, 'aktivitas'])->name('log.sidebar');
 });

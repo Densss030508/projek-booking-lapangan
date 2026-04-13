@@ -139,9 +139,7 @@ class KasirController extends Controller
         ]);
 
         if (Carbon::parse($request->tanggal)->lt(Carbon::today())) {
-            return back()
-                ->withInput()
-                ->with('error', 'Tidak bisa booking untuk tanggal yang sudah lewat!');
+            return back()->withInput()->with('error', 'Tidak bisa booking untuk tanggal yang sudah lewat!');
         }
 
         $lapangan = Lapangan::where('nama', $request->lapangan)
@@ -149,9 +147,7 @@ class KasirController extends Controller
             ->first();
 
         if (!$lapangan) {
-            return back()
-                ->withInput()
-                ->with('error', 'Lapangan tidak tersedia atau sedang dinonaktifkan!');
+            return back()->withInput()->with('error', 'Lapangan tidak tersedia atau sedang dinonaktifkan!');
         }
 
         $harga = (int) str_replace('.', '', $request->harga);
@@ -161,9 +157,7 @@ class KasirController extends Controller
         $kembalian = $bayar - $total;
 
         if ($bayar < $total) {
-            return back()
-                ->withInput()
-                ->with('error', 'Uang bayar kurang!');
+            return back()->withInput()->with('error', 'Uang bayar kurang!');
         }
 
         $jamDipilih = array_map('trim', explode(',', $request->jam));
@@ -177,9 +171,7 @@ class KasirController extends Controller
 
             foreach ($jamDipilih as $jam) {
                 if (in_array($jam, $jamBooked)) {
-                    return back()
-                        ->withInput()
-                        ->with('error', 'Jam ' . $jam . ' sudah dibooking!');
+                    return back()->withInput()->with('error', 'Jam ' . $jam . ' sudah dibooking!');
                 }
             }
         }
@@ -217,6 +209,13 @@ class KasirController extends Controller
     public function struk($id)
     {
         $data = Transaksi::findOrFail($id);
+
+        LogAktivitas::create([
+            'id_user' => Auth::id(),
+            'activity' => 'Mencetak struk transaksi ' . $data->kode_transaksi .
+                ' atas nama ' . $data->nama
+        ]);
+
         return view('kasir.struk', compact('data'));
     }
 
@@ -260,7 +259,6 @@ class KasirController extends Controller
     {
         $buka = (int) substr(trim($lap->jam_buka), 0, 2);
         $tutup = (int) substr(trim($lap->jam_tutup), 0, 2);
-
 
         if ($jam < $buka || $jam > $tutup) {
             return null;

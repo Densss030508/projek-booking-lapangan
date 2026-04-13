@@ -8,7 +8,7 @@
 
     <div class="box">
 
-        {{-- 🔥 Form pencarian --}}
+        {{--  Form pencarian --}}
         <form method="GET" action="{{ route('owner.produk') }}">
             <div class="filter-box">
                 <input type="text" name="cari" placeholder="Cari Lapangan..." value="{{ request('cari') }}">

@@ -39,7 +39,7 @@ class LapanganController extends Controller
             'jam_tutup' => '23:00'
         ]);
 
-        // ✅ LOG AKTIVITAS
+        //  LOG AKTIVITAS
         LogAktivitas::create([
             'id_user' => Auth::id(),
             'activity' => 'Menambahkan lapangan: ' . $lapangan->nama
@@ -79,7 +79,7 @@ class LapanganController extends Controller
             'foto' => $lapangan->foto
         ]);
 
-        // ✅ LOG AKTIVITAS
+        //  LOG AKTIVITAS
         LogAktivitas::create([
             'id_user' => Auth::id(),
             'activity' => 'Mengubah data lapangan: ' . $lapangan->nama
@@ -99,7 +99,7 @@ class LapanganController extends Controller
 
         $lapangan->delete();
 
-        // ✅ LOG AKTIVITAS
+        //  LOG AKTIVITAS
         LogAktivitas::create([
             'id_user' => Auth::id(),
             'activity' => 'Menghapus lapangan: ' . $namaLapangan
@@ -122,7 +122,7 @@ class LapanganController extends Controller
 
         $lapangan->save();
 
-        // ✅ LOG AKTIVITAS
+        //  LOG AKTIVITAS
         LogAktivitas::create([
             'id_user' => Auth::id(),
             'activity' => 'Mengubah status lapangan ' . $lapangan->nama . ' menjadi ' . $lapangan->status

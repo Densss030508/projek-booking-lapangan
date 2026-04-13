@@ -32,6 +32,7 @@
 
         .logo-area img {
             height: 50px;
+            filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.6));
         }
 
         .login-btn {
@@ -42,6 +43,12 @@
             background: transparent;
             cursor: pointer;
             font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .login-btn:hover {
+            background: #00e5ff;
+            color: #081b33;
         }
 
         .hero {
@@ -49,6 +56,7 @@
             background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
                 url('https://images.unsplash.com/photo-1556056504-5c7696c4c28d');
             background-size: cover;
+            background-position: center;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -56,9 +64,18 @@
         }
 
         .hero h1 {
-            font-size: 50px;
+            font-size: 60px;
+            background: linear-gradient(45deg, #00e5ff, #00e676);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
+        .hero p {
+            margin-top: 10px;
+            color: #ccc;
+        }
+
+        /* MODAL */
         .modal {
             display: none;
             position: fixed;
@@ -69,26 +86,39 @@
             background: rgba(0, 0, 0, 0.7);
             justify-content: center;
             align-items: center;
+            z-index: 999;
         }
 
         .modal-content {
             background: #102a4d;
-            padding: 30px;
-            border-radius: 10px;
-            width: 300px;
+            padding: 40px;
+            border-radius: 15px;
+            width: 350px;
+            position: relative;
         }
 
-        input {
+        .modal-content h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #00e5ff;
+        }
+
+        .modal-content input {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
+            border-radius: 8px;
+            border: none;
         }
 
-        button {
+        .modal-content button {
             width: 100%;
             padding: 10px;
-            background: #00e676;
+            margin-top: 15px;
+            border-radius: 20px;
             border: none;
+            background: linear-gradient(45deg, #00e676, #00c853);
+            font-weight: bold;
             cursor: pointer;
         }
 
@@ -97,32 +127,46 @@
             padding: 10px;
             margin-bottom: 10px;
             text-align: center;
+            border-radius: 6px;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 20px;
+            cursor: pointer;
         }
     </style>
 </head>
 
 <body>
 
+    <!-- NAVBAR -->
     <div class="navbar">
         <div class="logo-area">
-            <img src="{{ asset('images/kixa.png') }}">
+            <img src="{{ asset('images/kixa.png') }}" alt="KIXA Logo">
         </div>
         <button class="login-btn" onclick="openModal()">Login</button>
     </div>
 
+    <!-- HERO -->
     <section class="hero">
         <div>
             <h1>Welcome to KIXA Arena</h1>
+            <p>Booking Lapangan Futsal Modern & Profesional</p>
         </div>
     </section>
 
+    <!-- LOGIN MODAL -->
     <div class="modal" id="loginModal" style="display: {{ $errors->any() ? 'flex' : 'none' }};">
         <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
 
-            <form method="POST" action="/login">
+            <form method="POST" action="{{ route('login') }}">
                 @csrf
 
-                <h2>Login</h2>
+                <h2>Login KIXA</h2>
 
                 @if ($errors->any())
                     <div class="error-box">
@@ -130,7 +174,8 @@
                     </div>
                 @endif
 
-                <input type="text" name="username" placeholder="Username / Email" required>
+                <input type="text" name="username" placeholder="Username" value="{{ old('username') }}" required>
+
                 <input type="password" name="password" placeholder="Password" required>
 
                 <button type="submit">Login</button>
@@ -142,6 +187,10 @@
     <script>
         function openModal() {
             document.getElementById("loginModal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("loginModal").style.display = "none";
         }
     </script>
 

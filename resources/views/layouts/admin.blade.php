@@ -193,7 +193,7 @@
                 </div>
             </div>
 
-            <!-- ✅ SWEETALERT TARGET -->
+            <!--  SWEETALERT TARGET -->
             <form action="{{ route('logout') }}" method="POST" class="logout-form">
                 @csrf
                 <button type="submit" class="logout-btn">Logout</button>
@@ -205,10 +205,10 @@
         @yield('content')
     </div>
 
-    <!-- ✅ SWEETALERT CDN -->
+    <!--  SWEETALERT CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- ✅ SWEETALERT SCRIPT -->
+    <!--  SWEETALERT SCRIPT -->
     <script>
         const logoutForm = document.querySelector('.logout-form');
 

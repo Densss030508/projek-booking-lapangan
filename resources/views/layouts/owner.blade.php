@@ -278,7 +278,6 @@
                 </div>
             </div>
 
-            <!-- ✅ tetap form lama, hanya diganti jadi reusable -->
             <form method="POST" action="{{ route('logout') }}" class="logout-form">
                 @csrf
                 <button type="submit" class="logout-btn">Log Out</button>
@@ -292,7 +291,7 @@
         @yield('content')
     </div>
 
-    <!-- ✅ SweetAlert -->
+    <!--  SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const logoutForm = document.querySelector('.logout-form');

@@ -139,7 +139,6 @@
                 <p>{{ ucfirst(auth()->user()->role ?? 'Kasir') }}</p>
                 <small>{{ auth()->user()->nama ?? 'User' }}</small>
 
-                <!-- ✅ tetap form lama, hanya ditambah class -->
                 <form action="{{ route('logout') }}" method="POST" class="logout-form">
                     @csrf
                     <button type="submit" class="logout-btn">Log Out</button>
@@ -154,7 +153,7 @@
 
     </div>
 
-    <!-- ✅ SweetAlert modern -->
+    <!--  SweetAlert modern -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>

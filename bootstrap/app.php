@@ -11,8 +11,19 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function ($middleware) {
+
+        // =========================
+        // CSRF
+        // =========================
         $middleware->validateCsrfTokens(except: [
             'login',
+        ]);
+
+        // =========================
+        // FORCE MIDDLEWARE
+        // =========================
+        $middleware->alias([
+            'force.app' => \App\Http\Middleware\ForceFromApp::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

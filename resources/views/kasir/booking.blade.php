@@ -109,6 +109,14 @@
             background: #f1f1f1;
         }
 
+        .warning-bayar {
+            color: #e74c3c;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: -5px;
+            margin-bottom: 8px;
+        }
+
         button {
             width: 100%;
             padding: 10px;
@@ -229,6 +237,7 @@
                 <small>Wajib diisi kasir</small>
                 <input type="text" id="bayar_display" placeholder="Masukkan uang bayar" oninput="hitungKembalian(this)"
                     required>
+                <div id="warning_bayar" class="warning-bayar"></div>
 
                 <label>Kembalian</label>
                 <small>Otomatis dihitung</small>
@@ -239,6 +248,9 @@
         </div>
 
     </div>
+
+    <!-- TAMBAHAN SWEET ALERT -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         let selectedJam = [];
@@ -299,6 +311,7 @@
             document.getElementById('bayar_display').value = '';
             document.getElementById('bayar_value').value = '';
             document.getElementById('kembalian_display').value = '';
+            document.getElementById('warning_bayar').innerHTML = '';
 
             renderJam(nama, jamBuka, jamTutup);
         }
@@ -310,7 +323,6 @@
             let buka = parseInt(jamBuka.split(':')[0]);
             let tutup = parseInt(jamTutup.split(':')[0]);
 
-            // ✅ FIX JAM SLOT TERAKHIR IKUT TAMPIL
             for (let i = buka; i <= tutup; i++) {
                 let jam = String(i).padStart(2, '0') + ':00';
                 let div = document.createElement('div');
@@ -368,6 +380,9 @@
                     'Rp ' + formatRibuan(kembalian) :
                     'Kurang: Rp ' + formatRibuan(Math.abs(kembalian))) :
                 '';
+
+            document.getElementById('warning_bayar').innerHTML =
+                bayar > 0 && bayar < total ? '⚠️ Uang customer masih kurang!' : '';
         }
 
         function hitungKembalian(input) {
@@ -385,6 +400,9 @@
                     'Rp ' + formatRibuan(kembalian) :
                     'Kurang: Rp ' + formatRibuan(Math.abs(kembalian))) :
                 '';
+
+            document.getElementById('warning_bayar').innerHTML =
+                bayar > 0 && bayar < total ? '⚠️ Uang customer masih kurang!' : '';
         }
 
         function validasiBayar() {
@@ -409,7 +427,12 @@
             }
 
             if (bayar < total) {
-                alert('Uang kurang!');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Uang Kurang!',
+                    text: 'Nominal pembayaran customer masih kurang.',
+                    confirmButtonText: 'OK'
+                });
                 return false;
             }
 

@@ -82,7 +82,7 @@
             background: #e74c3c;
         }
 
-        /* ✅ NOTIFIKASI */
+        /*  NOTIFIKASI */
         .success-box {
             background: #2ecc71;
             color: white;
@@ -107,14 +107,14 @@
         <a href="{{ route('pengguna.index') }}" class="btn-back">← Kembali</a>
     </div>
 
-    {{-- ✅ NOTIF BERHASIL --}}
+    {{--  NOTIF BERHASIL --}}
     @if (session('success'))
         <div class="success-box">
             ✅ {{ session('success') }}
         </div>
     @endif
 
-    {{-- ✅ NOTIF ERROR --}}
+    {{--  NOTIF ERROR --}}
     @if (session('error'))
         <div class="error-box">
             ⚠️ {{ session('error') }}

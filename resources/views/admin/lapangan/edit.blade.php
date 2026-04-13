@@ -40,7 +40,7 @@
             background: #dcdcdc;
         }
 
-        {{-- ✅ Style untuk field yang tidak bisa diedit --}} .form-disabled {
+        .form-disabled {
             width: 100%;
             padding: 8px;
             background: #ccc;
@@ -57,6 +57,16 @@
             padding: 8px 20px;
             margin-top: 10px;
             cursor: pointer;
+        }
+
+        .btn-hapus {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+            margin-left: 10px;
         }
 
         .btn-kembali {
@@ -110,14 +120,12 @@
 
                 <div class="form-grid">
 
-                    <!-- KIRI -->
                     <div>
                         <div class="form-group">
                             <label>Nama Lapangan</label>
                             <input type="text" name="nama" value="{{ $lapangan->nama }}">
                         </div>
 
-                        {{-- ✅ Status tidak bisa diedit, hanya tampil statusnya --}}
                         <div class="form-group">
                             <label>Status</label>
                             <div class="form-disabled">
@@ -142,17 +150,14 @@
                         </div>
                     </div>
 
-                    <!-- KANAN -->
                     <div>
                         <div class="form-group">
                             <label>Harga Per Jam</label>
-                            {{-- ✅ Tampilan format ribuan --}}
                             <div class="input-harga-wrapper">
                                 <span>Rp</span>
                                 <input type="text" id="harga_display"
                                     value="{{ number_format($lapangan->harga, 0, ',', '.') }}" oninput="formatHarga(this)">
                             </div>
-                            {{-- ✅ Hidden field kirim angka murni ke server --}}
                             <input type="hidden" name="harga" id="harga_asli" value="{{ $lapangan->harga }}">
                         </div>
 
@@ -166,11 +171,21 @@
                 </div>
 
                 <button type="submit" class="btn-simpan">Update Lapangan</button>
+                <button type="button" class="btn-hapus" onclick="hapusLapangan()">Hapus Lapangan</button>
+            </form>
 
+            {{-- FORM DELETE TAMBAHAN --}}
+            <form id="form-hapus" action="{{ route('lapangan.destroy', $lapangan->id) }}" method="POST"
+                style="display:none;">
+                @csrf
+                @method('DELETE')
             </form>
         </div>
 
     </div>
+
+    {{-- SWEET ALERT --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         function formatHarga(input) {
@@ -180,7 +195,6 @@
             document.getElementById('harga_asli').value = angka;
         }
 
-        // ✅ Preview foto baru saat dipilih
         function previewGambar(event) {
             const input = event.target;
             const preview = document.getElementById('preview-img');
@@ -192,6 +206,24 @@
                 }
                 reader.readAsDataURL(input.files[0]);
             }
+        }
+
+        // HAPUS
+        function hapusLapangan() {
+            Swal.fire({
+                title: 'Yakin hapus lapangan?',
+                text: "Data yang dihapus tidak bisa dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('form-hapus').submit();
+                }
+            });
         }
     </script>
 

@@ -30,34 +30,69 @@ class AuthController extends Controller
             ->first();
 
         if (!$user) {
-            return back()->withErrors(['username' => 'User tidak ditemukan']);
+            return back()->withErrors([
+                'username' => 'User tidak ditemukan'
+            ]);
         }
 
         if ($user->status != 'aktif') {
-            return back()->withErrors(['username' => 'User tidak aktif']);
+            return back()->withErrors([
+                'username' => 'User tidak aktif'
+            ]);
         }
 
         if (!Hash::check($password, $user->password)) {
-            return back()->withErrors(['username' => 'Password salah']);
+            return back()->withErrors([
+                'username' => 'Password salah'
+            ]);
         }
 
-        Auth::loginUsingId($user->id);
+        /*
+        =====================================================
+        LOGIN FIX STABIL
+        =====================================================
+        */
+        Auth::login($user);
+
+        // regenerate session setelah login
         $request->session()->regenerate();
+
+        // session penanda aplikasi
+        $request->session()->put('from_app', true);
+        $request->session()->put('role_login_time', now());
 
         LogAktivitas::create([
             'id_user'  => $user->id,
             'activity' => 'Login sebagai ' . ucfirst($user->role),
         ]);
 
-        if ($user->role == 'admin') {
+        /*
+        =====================================================
+        ROLE REDIRECT
+        =====================================================
+        */
+        $role = strtolower(trim($user->role ?? ''));
+
+        if ($role === 'admin') {
             return redirect()->route('admin.dashboard');
-        } elseif ($user->role == 'kasir') {
+        }
+
+        if ($role === 'kasir') {
             return redirect()->route('kasir.dashboard');
-        } elseif ($user->role == 'owner') {
+        }
+
+        if ($role === 'owner') {
             return redirect()->route('owner.dashboard');
         }
 
-        return redirect('/');
+        // fallback kalau role tidak valid
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/')->withErrors([
+            'username' => 'Role tidak valid: ' . $user->role
+        ]);
     }
 
     public function logout(Request $request)
@@ -69,15 +104,21 @@ class AuthController extends Controller
             ]);
         }
 
+        // logout user
         Auth::logout();
+
+        // hapus semua session
         $request->session()->invalidate();
+
+        // buat token baru
         $request->session()->regenerateToken();
 
+        // 🔥 kembali ke welcome
         return redirect('/')
             ->withHeaders([
-                'Cache-Control' => 'no-cache, no-store, max-age=0, must-revalidate',
-                'Pragma'        => 'no-cache',
-                'Expires'       => 'Sat, 01 Jan 1990 00:00:00 GMT',
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => '0',
             ]);
     }
 }

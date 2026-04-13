@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\LogAktivitas;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
@@ -14,7 +15,6 @@ class UserController extends Controller
         return view('admin.pengguna.index', compact('users'));
     }
 
-    // ✅ CREATE PAGE
     public function create()
     {
         $ownerSudahAda = User::where('role', 'owner')->exists();
@@ -26,15 +26,12 @@ class UserController extends Controller
         ));
     }
 
-    // ✅ EDIT PAGE (FIX ERROR)
     public function edit($id)
     {
         $user = User::findOrFail($id);
-
         return view('admin.pengguna.edit', compact('user'));
     }
 
-    // ✅ STORE USER
     public function store(Request $request)
     {
         $request->validate([
@@ -45,7 +42,6 @@ class UserController extends Controller
             'password' => 'required|confirmed|min:5'
         ]);
 
-        // ✅ OWNER HANYA 1
         if ($request->role === 'owner') {
             $ownerSudahAda = User::where('role', 'owner')->exists();
 
@@ -55,7 +51,6 @@ class UserController extends Controller
             }
         }
 
-        // ✅ ADMIN HANYA 1
         if ($request->role === 'admin') {
             $adminSudahAda = User::where('role', 'admin')->exists();
 
@@ -65,7 +60,7 @@ class UserController extends Controller
             }
         }
 
-        User::create([
+        $user = User::create([
             'nama' => $request->nama,
             'username' => $request->email,
             'email' => $request->email,
@@ -74,11 +69,15 @@ class UserController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
+        LogAktivitas::create([
+            'id_user' => Auth::id(),
+            'activity' => 'Menambahkan user baru: ' . $user->nama
+        ]);
+
         return redirect()->route('pengguna.index')
             ->with('success', 'User berhasil ditambahkan!');
     }
 
-    // ✅ UPDATE USER
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -91,7 +90,6 @@ class UserController extends Controller
 
         $statusBaru = $user->status;
 
-        // ✅ OWNER SELALU AKTIF
         if ($user->role !== 'owner') {
             $statusBaru = $request->status ?? $user->status;
         }
@@ -106,10 +104,14 @@ class UserController extends Controller
                 : $user->password
         ]);
 
+        LogAktivitas::create([
+            'id_user' => Auth::id(),
+            'activity' => 'Mengubah data user: ' . $user->nama
+        ]);
+
         return back()->with('success', 'User berhasil diperbarui!');
     }
 
-    // ✅ DELETE USER
     public function destroy($id)
     {
         $user = User::findOrFail($id);
@@ -122,13 +124,19 @@ class UserController extends Controller
             return back()->with('error', 'Role owner tidak boleh dihapus!');
         }
 
+        $namaUser = $user->nama;
+
         $user->delete();
+
+        LogAktivitas::create([
+            'id_user' => Auth::id(),
+            'activity' => 'Menghapus user: ' . $namaUser
+        ]);
 
         return redirect()->route('pengguna.index')
             ->with('success', 'User berhasil dihapus!');
     }
 
-    // ✅ TOGGLE STATUS
     public function toggleStatus($id)
     {
         $user = User::findOrFail($id);
@@ -143,6 +151,11 @@ class UserController extends Controller
 
         $user->status = ($user->status === 'aktif') ? 'nonaktif' : 'aktif';
         $user->save();
+
+        LogAktivitas::create([
+            'id_user' => Auth::id(),
+            'activity' => 'Mengubah status user ' . $user->nama . ' menjadi ' . $user->status
+        ]);
 
         $pesan = $user->status === 'aktif' ? 'diaktifkan' : 'dinonaktifkan';
 

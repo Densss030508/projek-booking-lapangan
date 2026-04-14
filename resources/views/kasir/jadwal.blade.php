@@ -5,6 +5,23 @@
 @section('content')
 
     <style>
+        /* =========================
+               TAMBAHAN: PERBAIKI LOGO
+               ========================= */
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            max-width: 120px;
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
+
         .title {
             font-size: 20px;
             margin-bottom: 5px;

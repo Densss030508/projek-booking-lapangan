@@ -5,9 +5,6 @@
 @section('content')
 
     <style>
-        /* =========================
-               TAMBAHAN: PERBAIKI LOGO
-               ========================= */
         .logo {
             text-align: center;
             margin-bottom: 20px;
